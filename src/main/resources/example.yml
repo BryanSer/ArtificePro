@@ -3,9 +3,11 @@
 Name: 'example'
 #冷却时间 单位毫秒
 Cooldown: 5000 - 500 * %level%
+ManaCost: 100
 #这个技能能升级的最大等级
 #等级通过权限 artificepro.level.example.数字 来给予 高的会优先读取
 #玩家没有任何等级权限 默认等级为0
+#此外 所有表达式中 技能等级为%level%
 MaxLevel: 10
 #执行的动作 将按顺序执行
 Motions:
@@ -43,10 +45,10 @@ Motions:
             #共有以下几种
             #自身 Self()
             #指向的玩家 SightPlayer(最远距离)
-            #附近的玩家 RangeMultPlayer(搜索半径, 搜索数量 0表示无限, 是否包括自身)
+            #附近的玩家 RangePlayer(搜索半径, 搜索数量 0表示无限, 是否包括自身)
             #此外还有 虽然不能用于此 但是也是搜索用的
             #指向的实体 SightEntity(最远距离, 是否选择玩家)
-            #附近实体 RangeMultEntity(搜索半径, 搜索数量 0表示无限,是否搜索玩家, 是否包括自身)
+            #附近实体 RangeEntity(搜索半径, 搜索数量 0表示无限,是否搜索玩家, 是否包括自身)
             Finder: Self()
     '3':
         #至少要多少级才能执行这个动作

@@ -11,7 +11,16 @@ typealias VarReader = (Player, String) -> String?
 
 object ExpressionHelper {
     val compile = Pattern.compile("(?<pattern>%(?<name>[^%]*)%)")
+    val levelHolder = mutableMapOf<Int, Int>()
     val varReader = mutableListOf<VarReader>(
+            { p, s ->
+                val lv = levelHolder[p.entityId] ?: return@mutableListOf null
+                if (s.equals("%level%", true)) {
+                    lv.toString()
+                } else {
+                    null
+                }
+            },
             { p, s ->
                 val r = PlaceholderAPI.setPlaceholders(p, s)
                 return@mutableListOf if (r == s) null else r

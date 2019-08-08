@@ -1,5 +1,8 @@
 package com.github.bryanser.artificepro
 
+import com.github.bryanser.artificepro.motion.MotionManager
+import com.github.bryanser.artificepro.script.FinderManager
+import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ScriptManager
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
@@ -12,7 +15,9 @@ class Main : JavaPlugin() {
             Bukkit.getPluginManager().disablePlugin(this)
             return
         }
-
+        MotionManager.init()
+        SkillManager.loadConfig()
+        FinderManager.init()
     }
 
     override fun onDisable() {

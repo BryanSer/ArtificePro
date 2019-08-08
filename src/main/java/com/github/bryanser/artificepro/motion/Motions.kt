@@ -2,6 +2,8 @@ package com.github.bryanser.artificepro.motion
 
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.artificepro.script.*
+import com.github.bryanser.artificepro.script.finder.Finder
+import com.github.bryanser.artificepro.script.finder.PlayerFinderTemplate
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Arrow
@@ -26,7 +28,7 @@ class Scattering : Motion(
         var i = 0
         while (i++ < amount) {
             val a = p.launchProjectile(Arrow::class.java, randomVector(v))
-            a.setMetadata(METADATA_KEY,FixedMetadataValue(Main.Plugin,damage(p).toDouble()))
+            a.setMetadata(METADATA_KEY, FixedMetadataValue(Main.Plugin, damage(p).toDouble()))
             i++
         }
         return true
@@ -49,17 +51,17 @@ class Scattering : Motion(
         }
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-        fun onHit(evt:EntityDamageByEntityEvent){
-            val a= evt.damager as? Arrow ?: return
-            if(a.hasMetadata(METADATA_KEY)){
+        fun onHit(evt: EntityDamageByEntityEvent) {
+            val a = evt.damager as? Arrow ?: return
+            if (a.hasMetadata(METADATA_KEY)) {
                 val dmg = a.getMetadata(METADATA_KEY).first().asDouble()
                 evt.damage = dmg
             }
         }
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
-        fun onPick(evt:PlayerPickupArrowEvent){
-            if(evt.arrow.hasMetadata(METADATA_KEY)){
+        fun onPick(evt: PlayerPickupArrowEvent) {
+            if (evt.arrow.hasMetadata(METADATA_KEY)) {
                 evt.isCancelled = true
                 evt.arrow.remove()
             }
@@ -78,6 +80,25 @@ class Scattering : Motion(
         private fun random(d: Double): Double {
             return (if (this.ran.nextBoolean()) 1 else -1) * this.ran.nextDouble() / 2.0
         }
+    }
+
+}
+
+class Command : Motion("Command") {
+    lateinit var commands: MutableList<String>
+    lateinit var finder: Finder<Player>
+    override fun loadConfig(config: ConfigurationSection?) {
+        if (config == null) throw IllegalArgumentException("配置编写错误 缺少配置数据")
+        commands = config.getStringList("Commands")
+        val (f,t) = FinderManager.readFinder(config.getString("Finder"))
+        if(t !is PlayerFinderTemplate){
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Player")
+        }
+        finder = f as Finder<Player>
+    }
+
+    override fun cast(p: Player): Boolean {
+        TODO("not implemented")
     }
 
 }
