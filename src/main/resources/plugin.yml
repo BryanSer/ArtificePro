@@ -1,0 +1,4 @@
+name: ArtificePro
+version: ${project.version}
+main: com.github.bryanser.artificepro.ArtificePro
+api-version: 1.13
