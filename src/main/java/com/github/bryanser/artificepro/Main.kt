@@ -2,7 +2,7 @@ package com.github.bryanser.artificepro
 
 import org.bukkit.plugin.java.JavaPlugin
 
-class ArtificePro : JavaPlugin() {
+class Main : JavaPlugin() {
 
     override fun onEnable() {
         // Plugin startup logic
