@@ -130,5 +130,12 @@
             <version>Kt-1.0.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.9.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/PlaceholderAPI.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

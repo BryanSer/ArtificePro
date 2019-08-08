@@ -2,36 +2,58 @@
 #通过命令/ap cast example释放 需要权限 artificepro.cast.example
 Name: 'example'
 #冷却时间 单位毫秒
-Cooldown: 5000
+Cooldown: 5000 - 500 * %level%
+#这个技能能升级的最大等级
+#等级通过权限 artificepro.level.example.数字 来给予 高的会优先读取
+#玩家没有任何等级权限 默认等级为0
+MaxLevel: 10
 #执行的动作 将按顺序执行
 Motions:
     #这个填什么都行 反正会按顺序执行
     '0':
+        #至少要多少级才能执行这个动作
+        Level: 0
         #动作名 这个后面会告诉你 Scattering是散射
         Name: 'Scattering'
         #设定本动作的配置
         #每个动作接受的配置不一样 这个后面会给你表格
         Config:
             #散射剑的伤害
-            Damage: '%rpgattribute.attack% * 0.5'
+            damage: '%rpgattribute.attack% * 0.5'
             #散射的数量
-            Amount: 10
+            amount: 10
     '1':
+        #至少要多少级才能执行这个动作
+        Level: 0
         #动作: 延迟执行 会延迟后再执行剩下的动作
         Name: 'Delay'
         Config:
             #延迟时间 单位tick
             Time: 5
     '2':
+        #至少要多少级才能执行这个动作
+        Level: 0
         #动作 执行命令
         Name: 'Command'
         Config:
-            #命令列表 其中%caster%代表执行命令的人
+            #命令列表 其中%caster%代表执行命令的人 %from%永远表示释放本动作序列的人
             Commands:
                 - 'tell %caster% 你释放了散射'
             #寻找释放的人的方法
             #共有以下几种
-            #指向的玩家 SightPlayer
-            #
-            Finder:
+            #自身 Self()
+            #指向的玩家 SightPlayer(最远距离)
+            #附近的玩家 RangeMultPlayer(搜索半径, 搜索数量 0表示无限, 是否包括自身)
+            #此外还有 虽然不能用于此 但是也是搜索用的
+            #指向的实体 SightEntity(最远距离, 是否选择玩家)
+            #附近实体 RangeMultEntity(搜索半径, 搜索数量 0表示无限,是否搜索玩家, 是否包括自身)
+            Finder: Self()
+    '3':
+        #至少要多少级才能执行这个动作
+        Level: 1
+        Name: 'Command'
+        Config:
+            Commands:
+                - 'tell %caster% 你收到了%from%的视线'
+            Finder: SightPlayer(20)
     

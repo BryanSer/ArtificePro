@@ -8,6 +8,5 @@ abstract class Motion(
 ) {
     abstract fun cast(p: Player): Boolean
 
-    abstract fun loadConfig(config: ConfigurationSection?): ConfigurationSection
-    abstract fun saveConfig(config: ConfigurationSection)
+    abstract fun loadConfig(config: ConfigurationSection?)
 }
