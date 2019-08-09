@@ -20,6 +20,7 @@ class Step(
             run = { it, lv ->
                 Bukkit.getScheduler().runTaskLater(Main.Plugin, {
                     if (next != null) {
+                        ExpressionHelper.levelHolder[it.entityId] = lv
                         next!!.cast(it, lv)
                     }
                 }, time)

@@ -7,6 +7,7 @@ object MotionManager {
     private val motions = mutableMapOf<String, Class<out Motion>>()
     fun init() {
         registerMotion("Scattering", Scattering::class.java)
+        registerMotion("Command", Command::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

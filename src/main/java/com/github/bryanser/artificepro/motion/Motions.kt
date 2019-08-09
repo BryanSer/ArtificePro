@@ -85,20 +85,92 @@ class Scattering : Motion(
 }
 
 class Command : Motion("Command") {
-    lateinit var commands: MutableList<String>
+    //target,from
+    val commands: MutableList<(Player, Player) -> Unit> = mutableListOf()
     lateinit var finder: Finder<Player>
     override fun loadConfig(config: ConfigurationSection?) {
         if (config == null) throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        commands = config.getStringList("Commands")
-        val (f,t) = FinderManager.readFinder(config.getString("Finder"))
-        if(t !is PlayerFinderTemplate){
+        //commands = config.getStringList("Commands")
+        for (cmd in config.getStringList("Commands")) {
+            val arg = cmd.split(":".toRegex(), 2)
+            if(arg.size < 2){
+                throw IllegalArgumentException("动作Command编写错误 缺少p,target,op,targetop或c")
+            }
+            val cmd = arg[1]
+            when (arg[0].toLowerCase()) {
+                "p" -> {
+                    commands += { target, from ->
+                        try {
+                            Bukkit.dispatchCommand(from,
+                                    cmd.replace("%target", target.name).replace("%from%", from.name)
+                            )
+                        } catch (e: Exception) {
+                        }
+                    }
+                }
+                "target" -> {
+                    commands += { target, from ->
+                        try {
+                            Bukkit.dispatchCommand(target,
+                                    cmd.replace("%target", target.name).replace("%from%", from.name)
+                            )
+                        } catch (e: Exception) {
+                        }
+                    }
+                }
+                "op" -> {
+                    commands += { target, from ->
+                        val op = from.isOp
+                        try {
+                            from.isOp = true
+                            Bukkit.dispatchCommand(from,
+                                    cmd.replace("%target", target.name).replace("%from%", from.name)
+                            )
+                        } finally {
+                            from.isOp = op
+                        }
+                    }
+                }
+                "targetop" -> {
+                    commands += { target, from ->
+                        val op = target.isOp
+                        try {
+                            target.isOp = true
+                            Bukkit.dispatchCommand(target,
+                                    cmd.replace("%target", target.name).replace("%from%", from.name)
+                            )
+                        } finally {
+                            target.isOp = op
+                        }
+                    }
+                }
+                "c" -> {
+                    commands += { target, from ->
+                        try {
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+                                    cmd.replace("%target", target.name).replace("%from%", from.name)
+                            )
+                        } catch (e: Exception) {
+                        }
+                    }
+                }
+            }
+        }
+        val (f, t) = FinderManager.readFinder(config.getString("Finder","Self()"))
+        if (t !is PlayerFinderTemplate) {
             throw IllegalArgumentException("配置编写错误 Finder类型不是Player")
         }
         finder = f as Finder<Player>
     }
 
     override fun cast(p: Player): Boolean {
-        TODO("not implemented")
+        for (target in finder(p)) {
+            for (cmd in commands) {
+                cmd(target, p)
+            }
+        }
+        return true
     }
+
 
 }

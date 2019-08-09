@@ -1,4 +1,11 @@
 name: ArtificePro
 version: ${project.version}
 main: com.github.bryanser.artificepro.Main
-api-version: 1.13
+depend: [BrAPI,PlaceholderAPI]
+
+commands:
+    ArtificePro:
+        aliases: [ap]
+        usage: |
+            §6/<command> cast [技能名] >> 释放一个技能
+            §6/<command> reload >> 重载插件

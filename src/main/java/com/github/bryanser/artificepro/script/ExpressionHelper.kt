@@ -91,7 +91,7 @@ object ExpressionHelper {
             }
             """.trimIndent()
         val t = ScriptManager.createScriptEngine(Main.Plugin)
-        t.eval(script)
+        t.eval(scrr)
         if (isBoolean) {
             return {
                 val vari = mutableListOf<Double>()

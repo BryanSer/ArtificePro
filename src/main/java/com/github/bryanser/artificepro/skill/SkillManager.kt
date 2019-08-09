@@ -4,6 +4,7 @@ import com.github.bryanser.artificepro.Main
 import com.github.bryanser.brapi.Utils
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
 import java.io.File
 import java.util.logging.Level
 
@@ -25,5 +26,18 @@ object SkillManager {
                 Bukkit.getLogger().log(Level.WARNING, e, { "[ArtificePro] 读取文件: ${f.path}时出错" })
             }
         }
+    }
+
+    fun playerCastSkill(p: Player, skill: String) {
+        val skill = skills[skill]
+        if(skill == null){
+            p.sendMessage("§c找不到这个技能")
+            return
+        }
+        if(!p.hasPermission("artificepro.cast.${skill.name}")){
+            p.sendMessage("§c你不能使用这个技能")
+            return
+        }
+        skill.cast(p)
     }
 }

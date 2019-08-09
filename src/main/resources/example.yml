@@ -38,9 +38,14 @@ Motions:
         #动作 执行命令
         Name: 'Command'
         Config:
-            #命令列表 其中%caster%代表执行命令的人 %from%永远表示释放本动作序列的人
+            #命令列表 其中%target%代表执行命令的人 %from%永远表示释放本动作序列的人
+            #p:表示释放本动作序列的人自己执行
+            #target:表示Finder找到的人执行
+            #op:表示释放本动作序列的人以OP权限执行
+            #targetop:表示Finder找到的人以OP权限执行
+            #c:表示控制台执行
             Commands:
-                - 'tell %caster% 你释放了散射'
+                - 'c:tell %target% 你释放了散射'
             #寻找释放的人的方法
             #共有以下几种
             #自身 Self()
@@ -56,6 +61,6 @@ Motions:
         Name: 'Command'
         Config:
             Commands:
-                - 'tell %caster% 你收到了%from%的视线'
+                - 'c:tell %target% 你收到了%from%的视线'
             Finder: SightPlayer(20)
     
