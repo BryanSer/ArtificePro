@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 abstract class Motion(
         val name: String
 ) {
-    abstract fun cast(p: Player): Boolean
+    abstract fun cast(p: Player)
 
     abstract fun loadConfig(config: ConfigurationSection?)
 }

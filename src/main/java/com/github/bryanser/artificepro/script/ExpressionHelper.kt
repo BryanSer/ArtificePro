@@ -91,6 +91,7 @@ object ExpressionHelper {
             }
             """.trimIndent()
         val t = ScriptManager.createScriptEngine(Main.Plugin)
+        println("编译脚本: $scrr")
         t.eval(scrr)
         if (isBoolean) {
             return {
@@ -107,8 +108,8 @@ object ExpressionHelper {
                 for ((par, _) in vars) {
                     vari += readVar(it, par)
                 }
-                val d = t.invokeFunction("calc", *vari.toTypedArray()) as? Double ?: 0.0
-                ExpressionResult(d)
+                val d = t.invokeFunction("calc", *vari.toTypedArray()) as? Number ?: 0.0
+                ExpressionResult(d.toDouble())
             }
         }
     }

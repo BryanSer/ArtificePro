@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro
 
+import com.github.bryanser.artificepro.mana.ManaManager
 import com.github.bryanser.artificepro.motion.MotionManager
 import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.skill.SkillManager
@@ -21,9 +22,11 @@ class Main : JavaPlugin() {
         MotionManager.init()
         FinderManager.init()
         SkillManager.loadConfig()
+        ManaManager.usingManage
     }
 
     override fun onDisable() {
+        ManaManager.DefaultManager.save()
     }
 
     companion object {

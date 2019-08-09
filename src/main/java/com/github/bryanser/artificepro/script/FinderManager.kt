@@ -22,6 +22,8 @@ object FinderManager {
         finderTemplates[RangeEntityFinderTemplate.name] = RangeEntityFinderTemplate
         finderTemplates[RangePlayerFinderTemplate.name] = RangePlayerFinderTemplate
         finderTemplates[SelfFinder.name] = SelfFinder
+        finderTemplates[SectorEntityFinderTemplate.name] = SectorEntityFinderTemplate
+        finderTemplates[SectorPlayerFinderTemplate.name] = SectorPlayerFinderTemplate
     }
 
 }

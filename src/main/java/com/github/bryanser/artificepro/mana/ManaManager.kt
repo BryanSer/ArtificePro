@@ -13,6 +13,10 @@ import java.io.File
 interface ManaManager {
     fun getMana(p: Player): Double
 
+    fun getMaxMana(p: Player): Double
+
+    fun getManRecover(p: Player): Double
+
     fun costMana(p: Player, mana: Double)
 
     fun hasMana(p: Player, mana: Double) = getMana(p) >= mana
@@ -22,6 +26,10 @@ interface ManaManager {
     }
 
     object DefaultManager : ManaManager, BukkitRunnable() {
+        override fun getMaxMana(p: Player): Double = maxMana(p).toDouble()
+
+        override fun getManRecover(p: Player): Double = manaRecover(p).toDouble()
+
         override fun run() {
             if (!isEnable()) {
                 this.cancel()
@@ -81,8 +89,15 @@ interface ManaManager {
         }
 
         override fun costMana(p: Player, mana: Double) {
-            var curr = this.mana[p.name] ?: maxMana(p).toDouble()
-            curr += mana
+            val max = maxMana(p).toDouble()
+            var curr = this.mana[p.name] ?: max
+            curr -= mana
+            if (curr < 0) {
+                curr = 0.0
+            }
+            if (curr > max) {
+                curr = max
+            }
             this.mana[p.name] = curr
         }
 
