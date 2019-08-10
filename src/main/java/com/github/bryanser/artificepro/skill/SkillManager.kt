@@ -9,9 +9,11 @@ import java.io.File
 import java.util.logging.Level
 
 object SkillManager {
+    var enableCommandSkillCast = true
     val skills = mutableMapOf<String, Skill>()
 
     fun loadConfig() {
+        skills.clear()
         val folder = File(Main.Plugin.dataFolder, "${File.separator}skills${File.separator}")
         if (!folder.exists()) {
             folder.mkdirs()

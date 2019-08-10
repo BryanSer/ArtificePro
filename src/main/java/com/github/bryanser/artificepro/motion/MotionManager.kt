@@ -17,6 +17,7 @@ object MotionManager {
         registerMotion("FlamesColumn", FlamesColumn::class.java)
         registerMotion("Damage", Damage::class.java)
         registerMotion("Knock", Knock::class.java)
+        registerMotion("ShockWave", ShockWave::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

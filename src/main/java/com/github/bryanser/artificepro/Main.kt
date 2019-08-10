@@ -38,6 +38,9 @@ class Main : JavaPlugin() {
             return false
         }
         if (args[0].equals("cast", true) && args.size > 1 && sender is Player) {
+            if(!SkillManager.enableCommandSkillCast){
+                return true
+            }
             SkillManager.playerCastSkill(sender, args[1])
             return true
         }

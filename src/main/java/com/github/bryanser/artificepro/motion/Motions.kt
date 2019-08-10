@@ -5,10 +5,6 @@ import com.github.bryanser.artificepro.script.*
 import com.github.bryanser.artificepro.script.finder.EntityFinderTemplate
 import com.github.bryanser.artificepro.script.finder.Finder
 import com.github.bryanser.artificepro.script.finder.PlayerFinderTemplate
-import com.github.bryanser.brapi.particle.ColorData
-import com.github.bryanser.brapi.particle.OffsetData
-import com.github.bryanser.brapi.particle.ParticleInfo
-import com.github.bryanser.brapi.particle.ParticleType
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -28,9 +24,9 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.util.*
-import javax.print.attribute.IntegerSyntax
 import kotlin.math.*
 import Br.API.ParticleEffect.ParticleEffect
+import org.bukkit.Sound
 
 
 class Scattering : Motion(
@@ -597,6 +593,104 @@ class Knock : Motion("Knock") {
             finder = f as Finder<LivingEntity>
         } else {
             throw IllegalArgumentException("配置编写错误 缺少配置数据")
+        }
+    }
+
+}
+
+class ShockWave : Motion("ShockWave") {
+    lateinit var damage: Expression
+    lateinit var length: Expression
+    lateinit var width: Expression
+    lateinit var knock: Expression
+    lateinit var speed: Expression //每tick传播的距离
+
+    override fun cast(p: Player) {
+        val from = p.location
+        val effectVec = from.direction.clone()
+        effectVec.y = 0.6
+        effectVec.normalize()
+        val a_z = Vector(
+                -sin(Math.toRadians(from.yaw.toDouble())),
+                0.0,
+                cos(Math.toRadians(from.yaw.toDouble()))
+        ).normalize()
+        val a_y = Vector(0f, 1f, 0f)
+        val a_x = a_z.getCrossProduct(a_y).normalize()
+        var length = length(p).toDouble()
+        val width = width(p).toDouble() / 2
+        val damage = damage(p).toDouble()
+        val knock = knock(p).toDouble()
+        val speed = speed(p).toDouble()
+        object : BukkitRunnable() {
+            val damaged = mutableSetOf(p.entityId)
+            var len = speed
+            override fun run() {
+                if (len >= length) {
+                    this.cancel()
+                }
+                val center = from.clone().add(a_z.clone().multiply(len))
+                center.world.playSound(center, Sound.ENTITY_WITHER_BREAK_BLOCK, 0.1F, 0F)
+                var w = 0.0
+                while (w <= width) {
+                    var loc = center.clone().add(a_x.clone().multiply(w))
+                    for (e in loc.world.getNearbyEntities(loc, 0.5, 0.5, 0.5)) {
+                        if (e !is LivingEntity || damaged.contains(e.entityId)) continue
+                        damaged += e.entityId
+                        e.damage(damage, p)
+                        e.velocity = effectVec.clone().multiply(knock)
+                    }
+                    playEffect(loc, effectVec)
+                    loc = center.clone().add(a_x.clone().multiply(-w))
+                    for (e in loc.world.getNearbyEntities(loc, 0.5, 0.5, 0.5)) {
+                        if (e !is LivingEntity || damaged.contains(e.entityId)) continue
+                        damaged += e.entityId
+                        e.damage(damage, p)
+                        e.velocity = effectVec.clone().multiply(knock)
+                    }
+                    playEffect(loc, effectVec)
+                    w += 0.5
+                }
+                len += speed
+            }
+
+        }.runTaskTimer(Main.Plugin, 1, 1)
+    }
+
+    override fun loadConfig(config: ConfigurationSection?) {
+        if (config != null) {
+            damage = ExpressionHelper.compileExpression(config.getString("damage"))
+            length = ExpressionHelper.compileExpression(config.getString("length"))
+            width = ExpressionHelper.compileExpression(config.getString("width"))
+            knock = ExpressionHelper.compileExpression(config.getString("knock"))
+            speed = ExpressionHelper.compileExpression(config.getString("speed"))
+        } else {
+            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+        }
+    }
+
+    companion object {
+
+        private fun playEffect(loc: Location, vec: Vector) {
+            Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
+                var t = loc.block.type
+                if (t == Material.AIR) {
+                    t = loc.clone().add(0.0, -1.0, 0.0).block.type
+                }
+                if (t == Material.AIR) {
+                    t = Material.STONE
+                }
+                ParticleEffect.BLOCK_DUST.display(
+                        ParticleEffect.BlockData(t, 0),
+                        vec.x.toFloat(),
+                        vec.y.toFloat(),
+                        vec.z.toFloat(),
+                        0.1f,
+                        8,
+                        loc,
+                        50.0
+                )
+            }
         }
     }
 

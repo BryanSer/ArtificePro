@@ -29,7 +29,7 @@ class Skill(
         firstStep = steps.first()
     }
 
-    fun cast(p: Player) {
+    fun cast(p: Player, level: Int = -1) {
         val cost = manaCost(p).toDouble()
         if (!ManaManager.usingManage.hasMana(p, cost)) {
             p.sendMessage("§c你没有足够的蓝释放这个技能")
@@ -39,19 +39,22 @@ class Skill(
         val cd = cooldown(p).toLong()
         val pass = System.currentTimeMillis() - last
         if (pass < cd) {
-            p.sendMessage(String.format("§c技能还在冷却中 还需要%.2f秒", (cd - pass) / 1000.0))
+            p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
             return
         }
         ManaManager.usingManage.costMana(p, cost)
-        var level = maxLevel
-        while (level > 0) {
-            if (p.hasPermission("artificepro.level.${name}.$level")) {
-                break
+        var lv = level
+        if (lv == -1) {
+            lv = maxLevel
+            while (lv > 0) {
+                if (p.hasPermission("artificepro.level.${name}.$lv")) {
+                    break
+                }
+                lv--
             }
-            level--
         }
-        ExpressionHelper.levelHolder[p.entityId] = level
-        firstStep.cast(p, level)
+        ExpressionHelper.levelHolder[p.entityId] = lv
+        firstStep.cast(p, lv)
         lastCast[p.name] = System.currentTimeMillis()
     }
 }
