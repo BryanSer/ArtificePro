@@ -12,13 +12,13 @@ object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEnti
                 e !is Player && e != c
             },
             { e, c ->
-                e is Player && e != c
+                e != c
             },
             { e, c ->
                 e !is Player || e == c
             },
             { e, c ->
-                e is Player || e != c
+                true
             }
     )
 
@@ -28,7 +28,7 @@ object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEnti
         val player = if (args[2].toBoolean()) 1 else 0
         val self = if (args[3].toBoolean()) 2 else 0
         val filter = filters[player + self]
-        return { p ->
+        return Finder { p ->
             val list = mutableListOf<LivingEntity>()
             var count = 0
             for (e in p.getNearbyEntities(r, r, r)) {

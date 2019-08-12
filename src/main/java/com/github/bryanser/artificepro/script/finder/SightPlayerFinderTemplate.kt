@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 object SightPlayerFinderTemplate : PlayerFinderTemplate("SightPlayer") {
     override fun read(args: Array<String>): Finder<Player> {
         val range = args[0].toDouble()
-        return {
+        return Finder{
             val t = Tools.getLookAtEntity(it, range, range.toInt() * 2) {
                 it is Player
             } as? Player

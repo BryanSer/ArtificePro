@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
  */
 object SelfFinder : PlayerFinderTemplate("Self") {
     override fun read(args: Array<String>): Finder<Player> {
-        return {
+        return Finder {
             listOf(it)
         }
     }

@@ -12,7 +12,7 @@ object SightEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("SightEnti
         val range = args[0].toDouble()
         val player = args[1].toBoolean()
         return if (player) {
-            {
+            Finder{
                 val t = Tools.getLookAtEntity(it, range, range.toInt() * 2)
                 if (t != null) {
                     listOf(t)
@@ -21,7 +21,7 @@ object SightEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("SightEnti
                 }
             }
         } else {
-            {
+            Finder{
                 val t = Tools.getLookAtEntity(it, range, range.toInt() * 2) {
                     it is LivingEntity && it !is Player
                 }

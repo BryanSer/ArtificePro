@@ -10,7 +10,7 @@ object RangePlayerFinderTemplate : PlayerFinderTemplate("RangePlayer") {
         val r = args[0].toDouble()
         val max = args[1].toInt()
         val self = args[2].toBoolean()
-        return {
+        return Finder{
             val list = mutableListOf<Player>()
             var count = 0
             for (e in it.getNearbyEntities(r, r, r)) {

@@ -21,7 +21,14 @@ Motions:
         #每个动作接受的配置不一样 这个后面会给你表格
         Config:
             #散射剑的伤害
-            damage: '20'
+            damage: |
+                [Script]
+                function calc(p){
+                    if(p.isOp()){
+                        return 99999;
+                    }
+                    return 1;
+                }
             #散射的数量
             amount: '10'
     '1':

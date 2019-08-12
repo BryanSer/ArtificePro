@@ -14,7 +14,7 @@ object SkillManager {
 
     fun loadConfig() {
         skills.clear()
-        val folder = File(Main.Plugin.dataFolder, "${File.separator}skills${File.separator}")
+        val folder = File(Main.dataFolder, "${File.separator}skills${File.separator}")
         if (!folder.exists()) {
             folder.mkdirs()
             Utils.saveResource(Main.Plugin, "example.yml", folder)

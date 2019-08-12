@@ -10,17 +10,21 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
 
 class Main : JavaPlugin() {
 
-    override fun onEnable() {
+    override fun onLoad() {
         Plugin = this
+        MotionManager.init()
+        FinderManager.init()
+    }
+
+    override fun onEnable() {
         if (!ScriptManager.hasNashorn) {
             Bukkit.getPluginManager().disablePlugin(this)
             return
         }
-        MotionManager.init()
-        FinderManager.init()
         SkillManager.loadConfig()
         ManaManager.usingManage
     }
@@ -29,8 +33,22 @@ class Main : JavaPlugin() {
         ManaManager.DefaultManager.save()
     }
 
+
+
     companion object {
         lateinit var Plugin: Main
+
+        val dataFolder: File by lazy {
+            val df = Plugin.description
+            if(df.description == null || df.description.isEmpty()){
+                return@lazy Plugin.dataFolder
+            }
+            val f = File(df.description)
+            if (!f.exists()) {
+                f.mkdirs()
+            }
+            f
+        }
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

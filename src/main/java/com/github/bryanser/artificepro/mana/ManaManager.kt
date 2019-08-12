@@ -56,9 +56,9 @@ interface ManaManager {
         }
 
         init {
-            val f = File(Main.Plugin.dataFolder, "config.yml")
+            val f = File(Main.dataFolder, "config.yml")
             if (!f.exists()) {
-                Utils.saveResource(Main.Plugin, "config.yml")
+                Utils.saveResource(Main.Plugin, "config.yml", Main.dataFolder)
             }
             val config = YamlConfiguration.loadConfiguration(f)
             maxMana = ExpressionHelper.compileExpression(config.getString("Mana.MaxMana"))
@@ -80,7 +80,7 @@ interface ManaManager {
         }
 
         fun save() {
-            val f = File(Main.Plugin.dataFolder, "mana.yml")
+            val f = File(Main.dataFolder, "mana.yml")
             val data = YamlConfiguration()
             for ((p, m) in mana) {
                 data.set(p, m)

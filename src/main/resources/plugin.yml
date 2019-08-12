@@ -2,6 +2,7 @@ name: ArtificePro
 version: ${project.version}
 main: com.github.bryanser.artificepro.Main
 depend: [BrAPI,PlaceholderAPI]
+description: 'F:/零世纪制作/BC/ArtificePro'
 
 commands:
     ArtificePro:

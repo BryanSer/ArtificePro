@@ -8,7 +8,7 @@ object SectorEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("SectorEn
         val r = args[0].toDouble()
         val angle = Math.toRadians(args[1].toDouble()) / 2
         val player = args[2].toBoolean()
-        return {
+        return Finder{
             val pd = it.location.direction
             pd.y = 0.0
             val list = mutableListOf<LivingEntity>()

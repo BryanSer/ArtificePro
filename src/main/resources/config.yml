@@ -1,6 +1,17 @@
 #自带的蓝量管理器
 Mana:
     #每个玩家的最大蓝量(支持表达式)
-    MaxMana: 100.0
+    MaxMana: |
+        [Script]
+        function calc(p){
+            var max = 100.0;
+            if(p.hasPermission('vip.1')){
+                max += 100.0;
+            }
+            if(p.hasPermission('vip.2'){
+                max += 200.0;
+            }
+            return max;
+        }
     #每秒钟回复速度(支持表达式)
     ManaRecover: 1

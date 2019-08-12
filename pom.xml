@@ -6,7 +6,7 @@
 
     <groupId>com.github.bryanser</groupId>
     <artifactId>ArtificePro</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
     <packaging>jar</packaging>
 
     <name>ArtificePro</name>
@@ -136,6 +136,13 @@
             <version>2.9.2</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/PlaceholderAPI.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>net.citizensnpcs</groupId>
+            <artifactId>citizensnpcs</artifactId>
+            <version>1.2.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/Citizens.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

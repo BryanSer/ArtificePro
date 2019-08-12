@@ -27,19 +27,22 @@ import java.util.*
 import kotlin.math.*
 import Br.API.ParticleEffect.ParticleEffect
 import org.bukkit.Sound
+import org.bukkit.entity.Projectile
 
 
 class Scattering : Motion(
         "Scattering"
 ) {
+
     lateinit var damage: Expression
     lateinit var amount: Expression
+    var projectileType = ProjectileType.ARROW
     override fun cast(p: Player) {
         val v = p.location.direction
         val amount = amount(p).toInt()
         var i = 0
         while (i < amount) {
-            val a = p.launchProjectile(Arrow::class.java, randomVector(v))
+            val a = p.launchProjectile(projectileType.clazz, randomVector(v))
             a.setMetadata(METADATA_KEY, FixedMetadataValue(Main.Plugin, damage(p).toDouble()))
             i++
         }
@@ -49,6 +52,7 @@ class Scattering : Motion(
         if (config != null) {
             damage = ExpressionHelper.compileExpression(config.getString("damage"))
             amount = ExpressionHelper.compileExpression(config.getString("amount"))
+            projectileType = ProjectileType.valueOf(config.getString("ProjectileType","ARROW"))
         } else {
             throw IllegalArgumentException("配置编写错误 缺少配置数据")
         }
@@ -63,7 +67,7 @@ class Scattering : Motion(
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         fun onHit(evt: EntityDamageByEntityEvent) {
-            val a = evt.damager as? Arrow ?: return
+            val a = evt.damager as? Projectile ?: return
             if (a.hasMetadata(METADATA_KEY)) {
                 val dmg = a.getMetadata(METADATA_KEY).first().asDouble()
                 evt.damage = dmg
@@ -189,12 +193,13 @@ class GuidedArrow : Motion("GuidedArrow") {
     lateinit var damage: Expression
     lateinit var time: Expression
     lateinit var finder: Finder<LivingEntity>
+    var projectileType = ProjectileType.ARROW
     override fun cast(p: Player) {
         val maxTime = time(p).toLong()
         val dmg = damage(p).toDouble()
         for (target in finder(p)) {
-            val arrow: Arrow = p.launchProjectile(
-                    Arrow::class.java,
+            val arrow = p.launchProjectile(
+                    projectileType.clazz,
                     target.eyeLocation.subtract(p.location).toVector().normalize()
             )
             arrow.setMetadata(Scattering.METADATA_KEY, FixedMetadataValue(Main.Plugin, dmg))
@@ -217,6 +222,7 @@ class GuidedArrow : Motion("GuidedArrow") {
         if (config != null) {
             damage = ExpressionHelper.compileExpression(config.getString("damage"))
             time = ExpressionHelper.compileExpression(config.getString("time"))
+            projectileType = ProjectileType.valueOf(config.getString("ProjectileType","ARROW"))
             val (f, t) = FinderManager.readFinder(config.getString("Finder"))
             if (t !is EntityFinderTemplate) {
                 throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
@@ -297,7 +303,7 @@ class Charge : Motion("Charge") {
                 p.velocity = vec
                 for (e in p.getNearbyEntities(0.25, 0.25, 0.25)) {
                     if (e is LivingEntity && e !== p && !damaged.contains(e.entityId)) {
-                        e.damage(dmg)
+                        e.damage(dmg, p)
                         val tvec = e.location.subtract(p.location).toVector()
                         tvec.y = 1.0
                         tvec.normalize().multiply(knock)
