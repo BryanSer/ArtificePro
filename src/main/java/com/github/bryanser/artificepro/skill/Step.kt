@@ -1,49 +1,57 @@
 package com.github.bryanser.artificepro.skill
 
 import com.github.bryanser.artificepro.Main
+import com.github.bryanser.artificepro.motion.CastInfo
 import com.github.bryanser.artificepro.motion.MotionManager
 import com.github.bryanser.artificepro.script.ExpressionHelper
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
+import java.util.*
+
+@FunctionalInterface
+interface IStep {
+    fun cast(p: Player, lv: Int, castId: UUID)
+}
 
 class Step(
         config: ConfigurationSection
-) {
-    var next: Step? = null
+) : IStep {
+    var next: IStep? = null
     val level: Int = config.getInt("Level")
-    val run: (Player, Int) -> Unit
+    val run: (Player, Int, UUID) -> Unit
 
     init {
+
         if (config.getString("Name") == "Delay") {
             val time = config.getLong("Config.Time")
-            run = { it, lv ->
+            run = { it, lv, castID ->
                 Bukkit.getScheduler().runTaskLater(Main.Plugin, {
                     if (next != null) {
                         ExpressionHelper.levelHolder[it.entityId] = lv
-                        next!!.cast(it, lv)
+                        next!!.cast(it, lv, castID)
                     }
                 }, time)
             }
         } else {
             val motion = MotionManager.loadMotion(config)
-            run = { it, lv ->
-                motion.cast(it)
+            run = { it, lv, castID ->
+                motion.cast(CastInfo(it, it, castID))
                 if (next != null) {
-                    next!!.cast(it, lv)
+                    next!!.cast(it, lv, castID)
                 }
             }
         }
     }
 
-    fun cast(p: Player, lv: Int) {
+    override fun cast(p: Player, lv: Int, castId: UUID) {
         if (lv < level) {
             if (next != null) {
-                next!!.cast(p, lv)
+                next!!.cast(p, lv, castId)
                 return
             }
         }
-        this.run(p, lv)
+        this.run(p, lv, castId)
     }
 
 }

@@ -11,8 +11,29 @@ ManaCost: 100
 MaxLevel: 10
 #执行的动作 将按顺序执行
 Motions:
-    #这个填什么都行 反正会按顺序执行
+    #触发器范例
     '0':
+        Level: 0
+        Name: 'Trigger'
+        Config:
+            Type: 'DamageTrigger'
+            #触发次数无限
+            maxTime: 0
+            #会让被伤害到的人执行触发器里的动作的Finder
+            triggerFinder: true
+            #这个触发器只会在伤害大于10的时候触发
+            minDamage: 10
+            #执行的动作
+            #给命中的人一个粒子圈
+            motion:
+                Name: 'ParticleCircle'
+                Config:
+                    Finder: 'EntityLocation(SelfEntity())'
+                    r: 1.5
+                    p: 12
+                    Particle: Flame
+    #这个填什么都行 反正会按顺序执行
+    '1':
         #至少要多少级才能执行这个动作
         Level: 0
         #动作名 这个后面会告诉你 Scattering是散射
@@ -21,17 +42,10 @@ Motions:
         #每个动作接受的配置不一样 这个后面会给你表格
         Config:
             #散射剑的伤害
-            damage: |
-                [Script]
-                function calc(p){
-                    if(p.isOp()){
-                        return 99999;
-                    }
-                    return 1;
-                }
+            damage: '20'
             #散射的数量
             amount: '10'
-    '1':
+    '2':
         #至少要多少级才能执行这个动作
         Level: 0
         #动作: 延迟执行 会延迟后再执行剩下的动作
@@ -39,7 +53,7 @@ Motions:
         Config:
             #延迟时间 单位tick
             Time: 5
-    '2':
+    '3':
         #至少要多少级才能执行这个动作
         Level: 0
         #动作 执行命令
@@ -62,7 +76,7 @@ Motions:
             #指向的实体 SightEntity(最远距离, 是否选择玩家)
             #附近实体 RangeEntity(搜索半径, 搜索数量 0表示无限,是否搜索玩家, 是否包括自身)
             Finder: Self()
-    '3':
+    '4':
         #至少要多少级才能执行这个动作
         Level: 1
         Name: 'Command'

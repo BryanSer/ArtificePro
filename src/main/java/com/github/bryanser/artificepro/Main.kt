@@ -2,6 +2,8 @@ package com.github.bryanser.artificepro
 
 import com.github.bryanser.artificepro.mana.ManaManager
 import com.github.bryanser.artificepro.motion.MotionManager
+import com.github.bryanser.artificepro.motion.trigger.TriggerManager
+import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ScriptManager
@@ -18,6 +20,8 @@ class Main : JavaPlugin() {
         Plugin = this
         MotionManager.init()
         FinderManager.init()
+        ParticleManager.init()
+        TriggerManager.init()
     }
 
     override fun onEnable() {

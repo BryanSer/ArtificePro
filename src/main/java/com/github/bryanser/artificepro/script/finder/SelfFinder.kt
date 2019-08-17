@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
 /*
@@ -8,8 +9,17 @@ import org.bukkit.entity.Player
 object SelfFinder : PlayerFinderTemplate("Self") {
     override fun read(args: Array<String>): Finder<Player> {
         return Finder {
-            listOf(it)
+            if (it is Player)
+                listOf(it)
+            else listOf()
         }
+    }
+
+}
+
+object SelfEntityFinder : EntityFinderTemplate<LivingEntity>("SelfEntity") {
+    override fun read(args: Array<String>): Finder<LivingEntity> {
+        return Finder { listOf(it) }
     }
 
 }

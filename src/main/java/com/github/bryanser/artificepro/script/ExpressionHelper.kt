@@ -48,7 +48,7 @@ object ExpressionHelper {
              * }
              * 将会传入玩家对象作为变量
             */
-            val src = src.replaceFirst("[Scrpit]", "")
+            val src = src.replaceFirst("[Script]", "")
             val t = ScriptManager.createScriptEngine(Main.Plugin)
             t.eval(src)
             if (isBoolean) {

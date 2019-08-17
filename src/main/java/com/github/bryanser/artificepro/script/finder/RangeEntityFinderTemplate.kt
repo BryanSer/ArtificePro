@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
  * 参数: 搜寻半径, 搜寻数量(0表示无限), 是否搜索玩家, 是否包括自身
  */
 object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEntity") {
-    val filters = arrayOf<(LivingEntity, Player) -> Boolean>(
+    val filters = arrayOf<(LivingEntity, LivingEntity) -> Boolean>(
             { e, c ->
                 e !is Player && e != c
             },

@@ -1,16 +1,20 @@
 package com.github.bryanser.artificepro.skill
 
+import com.github.bryanser.artificepro.CastData
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.brapi.Utils
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import java.io.File
+import java.util.*
 import java.util.logging.Level
+
 
 object SkillManager {
     var enableCommandSkillCast = true
-    val skills = mutableMapOf<String, Skill>()
+    val skills = mutableMapOf<String, Castable>()
+    val castingSkill = mutableMapOf<UUID, CastData>()
 
     fun loadConfig() {
         skills.clear()
@@ -32,11 +36,11 @@ object SkillManager {
 
     fun playerCastSkill(p: Player, skill: String) {
         val skill = skills[skill]
-        if(skill == null){
+        if (skill == null) {
             p.sendMessage("§c找不到这个技能")
             return
         }
-        if(!p.hasPermission("artificepro.cast.${skill.name}")){
+        if (!p.hasPermission("artificepro.cast.${skill.name}")) {
             p.sendMessage("§c你不能使用这个技能")
             return
         }

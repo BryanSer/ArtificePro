@@ -1,18 +1,27 @@
 package com.github.bryanser.artificepro.motion
 
+import Br.API.ParticleEffect.ParticleEffect
 import com.github.bryanser.artificepro.Main
-import com.github.bryanser.artificepro.script.*
+import com.github.bryanser.artificepro.motion.Scattering.Companion.METADATA_UUID
+import com.github.bryanser.artificepro.motion.trigger.Trigger
+import com.github.bryanser.artificepro.motion.trigger.TriggerManager
+import com.github.bryanser.artificepro.script.Expression
+import com.github.bryanser.artificepro.script.ExpressionHelper
+import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.script.finder.EntityFinderTemplate
 import com.github.bryanser.artificepro.script.finder.Finder
 import com.github.bryanser.artificepro.script.finder.PlayerFinderTemplate
+import com.github.bryanser.artificepro.script.finder.isCitizens
+import com.github.bryanser.artificepro.skill.SkillManager
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.entity.Arrow
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -24,10 +33,9 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.math.*
-import Br.API.ParticleEffect.ParticleEffect
-import org.bukkit.Sound
-import org.bukkit.entity.Projectile
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 
 class Scattering : Motion(
@@ -37,29 +45,28 @@ class Scattering : Motion(
     lateinit var damage: Expression
     lateinit var amount: Expression
     var projectileType = ProjectileType.ARROW
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val v = p.location.direction
         val amount = amount(p).toInt()
         var i = 0
         while (i < amount) {
             val a = p.launchProjectile(projectileType.clazz, randomVector(v))
+            a.setMetadata(METADATA_UUID, FixedMetadataValue(Main.Plugin, ci.castId.toString()))
             a.setMetadata(METADATA_KEY, FixedMetadataValue(Main.Plugin, damage(p).toDouble()))
             i++
         }
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            amount = ExpressionHelper.compileExpression(config.getString("amount"))
-            projectileType = ProjectileType.valueOf(config.getString("ProjectileType","ARROW"))
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        amount = ExpressionHelper.compileExpression(config.getString("amount"))
+        projectileType = ProjectileType.valueOf(config.getString("ProjectileType", "ARROW"))
     }
 
     companion object : Listener {
-        const val METADATA_KEY: String = "artificepro_arrow_damage"
+        const val METADATA_KEY: String = "artificepro_projectile_damage"
+        const val METADATA_UUID: String = "artificepro_projectile_uuid"
 
         init {
             Bukkit.getPluginManager().registerEvents(this, Main.Plugin)
@@ -70,7 +77,12 @@ class Scattering : Motion(
             val a = evt.damager as? Projectile ?: return
             if (a.hasMetadata(METADATA_KEY)) {
                 val dmg = a.getMetadata(METADATA_KEY).first().asDouble()
+                val uuid = UUID.fromString(a.getMetadata(METADATA_UUID).first().asString())
                 evt.damage = dmg
+                val e = evt.entity as? LivingEntity ?: return
+                val p = SkillManager.castingSkill[uuid]?.player ?: return
+                evt.damage = 0.0
+                e.motionDamage(dmg, p, uuid)
             }
         }
 
@@ -103,8 +115,7 @@ class Command : Motion("Command") {
     //target,from
     val commands: MutableList<(Player, Player) -> Unit> = mutableListOf()
     lateinit var finder: Finder<Player>
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config == null) throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
         //commands = config.getStringList("Commands")
         for (cmd in config.getStringList("Commands")) {
             val arg = cmd.split(":".toRegex(), 2)
@@ -178,8 +189,9 @@ class Command : Motion("Command") {
         finder = f as Finder<Player>
     }
 
-    override fun cast(p: Player) {
-        for (target in finder(p)) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
+        for (target in finder(ci)) {
             for (cmd in commands) {
                 cmd(target, p)
             }
@@ -194,14 +206,16 @@ class GuidedArrow : Motion("GuidedArrow") {
     lateinit var time: Expression
     lateinit var finder: Finder<LivingEntity>
     var projectileType = ProjectileType.ARROW
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val maxTime = time(p).toLong()
         val dmg = damage(p).toDouble()
-        for (target in finder(p)) {
+        for (target in finder(ci)) {
             val arrow = p.launchProjectile(
                     projectileType.clazz,
                     target.eyeLocation.subtract(p.location).toVector().normalize()
             )
+            arrow.setMetadata(METADATA_UUID, FixedMetadataValue(Main.Plugin, ci.castId.toString()))
             arrow.setMetadata(Scattering.METADATA_KEY, FixedMetadataValue(Main.Plugin, dmg))
             object : BukkitRunnable() {
                 var time = 0L
@@ -218,19 +232,16 @@ class GuidedArrow : Motion("GuidedArrow") {
     }
 
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            time = ExpressionHelper.compileExpression(config.getString("time"))
-            projectileType = ProjectileType.valueOf(config.getString("ProjectileType","ARROW"))
-            val (f, t) = FinderManager.readFinder(config.getString("Finder"))
-            if (t !is EntityFinderTemplate) {
-                throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
-            }
-            finder = f as Finder<LivingEntity>
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        time = ExpressionHelper.compileExpression(config.getString("time"))
+        projectileType = ProjectileType.valueOf(config.getString("ProjectileType", "ARROW"))
+        val (f, t) = FinderManager.readFinder(config.getString("Finder"))
+        if (t !is EntityFinderTemplate) {
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
         }
+        finder = f as Finder<LivingEntity>
+
     }
 
 }
@@ -241,27 +252,25 @@ class Effect : Motion("Effect") {
     lateinit var level: Expression
     lateinit var finder: Finder<LivingEntity>
 
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val tick = time(p).toInt()
         val lv = level(p).toInt() - 1
-        for (target in finder(p)) {
-            target.addPotionEffect(PotionEffect(PotionEffectType.getById(id), tick, lv))
+        for (target in finder(ci)) {
+            target.effect(PotionEffect(PotionEffectType.getById(id), tick, lv), ci.castId)
         }
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            id = config.getInt("id")
-            time = ExpressionHelper.compileExpression(config.getString("time"))
-            level = ExpressionHelper.compileExpression(config.getString("level"))
-            val (f, t) = FinderManager.readFinder(config.getString("Finder"))
-            if (t !is EntityFinderTemplate) {
-                throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
-            }
-            finder = f as Finder<LivingEntity>
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
+        id = config.getInt("id")
+        time = ExpressionHelper.compileExpression(config.getString("time"))
+        level = ExpressionHelper.compileExpression(config.getString("level"))
+        val (f, t) = FinderManager.readFinder(config.getString("Finder"))
+        if (t !is EntityFinderTemplate) {
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
         }
+        finder = f as Finder<LivingEntity>
+
     }
 
 }
@@ -271,7 +280,8 @@ class Charge : Motion("Charge") {
     lateinit var length: Expression
     lateinit var knock: Expression
     lateinit var stop: Expression
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val dmg = damage(p).toDouble()
         var lengthSq = length(p).toDouble()
         lengthSq *= lengthSq
@@ -285,6 +295,11 @@ class Charge : Motion("Charge") {
             var time = 0
             val damaged = mutableSetOf<Int>()
             override fun run() {
+                if (p.world != start.world) {
+                    this.cancel()
+                    p.velocity = Vector()
+                    return
+                }
                 if (time++ >= 100) {
                     this.cancel()
                     p.velocity = Vector()
@@ -302,12 +317,16 @@ class Charge : Motion("Charge") {
                 }
                 p.velocity = vec
                 for (e in p.getNearbyEntities(0.25, 0.25, 0.25)) {
+                    if (isCitizens(e)) {
+                        continue
+                    }
                     if (e is LivingEntity && e !== p && !damaged.contains(e.entityId)) {
-                        e.damage(dmg, p)
+                        e.motionDamage(dmg, p, ci.castId)
                         val tvec = e.location.subtract(p.location).toVector()
                         tvec.y = 1.0
                         tvec.normalize().multiply(knock)
-                        e.velocity = tvec
+                        //e.velocity = tvec
+                        e.knock(tvec, ci.castId)
                         damaged += e.entityId
                         if (stop) {
                             p.velocity = Vector()
@@ -320,15 +339,12 @@ class Charge : Motion("Charge") {
         }.runTaskTimer(Main.Plugin, 1, 1)
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            length = ExpressionHelper.compileExpression(config.getString("length"))
-            knock = ExpressionHelper.compileExpression(config.getString("knock"))
-            stop = ExpressionHelper.compileExpression(config.getString("stop"), true)
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        length = ExpressionHelper.compileExpression(config.getString("length"))
+        knock = ExpressionHelper.compileExpression(config.getString("knock"))
+        stop = ExpressionHelper.compileExpression(config.getString("stop"), true)
+
     }
 
 }
@@ -337,7 +353,8 @@ class Jump : Motion("Jump") {
     lateinit var power: Expression
     lateinit var back: Expression
     var high: Expression? = null
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val vec = p.location.direction
         if (back(p).toBoolean()) {
             vec.x *= -1
@@ -347,18 +364,15 @@ class Jump : Motion("Jump") {
             vec.y = high!!(p).toDouble()
         }
         vec.normalize().multiply(power(p).toDouble())
-        p.velocity = vec
+        p.knock(vec, ci.castId)
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            power = ExpressionHelper.compileExpression(config.getString("power"))
-            back = ExpressionHelper.compileExpression(config.getString("back"), true)
-            if (config.contains("high"))
-                high = ExpressionHelper.compileExpression(config.getString("high"))
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        power = ExpressionHelper.compileExpression(config.getString("power"))
+        back = ExpressionHelper.compileExpression(config.getString("back"), true)
+        if (config.contains("high"))
+            high = ExpressionHelper.compileExpression(config.getString("high"))
+
     }
 
 }
@@ -366,7 +380,8 @@ class Jump : Motion("Jump") {
 class Flash : Motion("Flash") {
     lateinit var length: Expression
     lateinit var air: Expression
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val length = length(p).toDouble()
         val vec = p.location.direction.normalize()
         if (!air(p).toBoolean()) {
@@ -389,13 +404,11 @@ class Flash : Motion("Flash") {
         p.teleport(last)
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            length = ExpressionHelper.compileExpression(config.getString("length"))
-            air = ExpressionHelper.compileExpression(config.getString("air"), true)
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        length = ExpressionHelper.compileExpression(config.getString("length"))
+        air = ExpressionHelper.compileExpression(config.getString("air"), true)
+
+
     }
 
 }
@@ -405,10 +418,11 @@ class Heal : Motion("Heal") {
     lateinit var percentage: Expression
     lateinit var finder: Finder<LivingEntity>
 
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val per = percentage(p).toBoolean()
         val v = amount(p).toDouble()
-        for (target in finder(p)) {
+        for (target in finder(ci)) {
             val max = target.getAttribute(Attribute.GENERIC_MAX_HEALTH).value
             val h = if (per) {
                 max * v
@@ -425,18 +439,15 @@ class Heal : Motion("Heal") {
         }
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            amount = ExpressionHelper.compileExpression(config.getString("amount"))
-            percentage = ExpressionHelper.compileExpression(config.getString("percentage"), true)
-            val (f, t) = FinderManager.readFinder(config.getString("Finder"))
-            if (t !is EntityFinderTemplate) {
-                throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
-            }
-            finder = f as Finder<LivingEntity>
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
+        amount = ExpressionHelper.compileExpression(config.getString("amount"))
+        percentage = ExpressionHelper.compileExpression(config.getString("percentage"), true)
+        val (f, t) = FinderManager.readFinder(config.getString("Finder"))
+        if (t !is EntityFinderTemplate) {
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
         }
+        finder = f as Finder<LivingEntity>
+
     }
 }
 
@@ -446,7 +457,8 @@ class FlamesColumn : Motion("FlamesColumn") {
     lateinit var range: Expression
     lateinit var delay: Expression
     lateinit var fireTick: Expression
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         var b = p.getTargetBlock(mutableSetOf<Material>(Material.AIR), range(p).toInt()).location
         while (b.block.type == Material.AIR && b.y > 0) {
             b.add(0.0, -1.0, 0.0)
@@ -468,7 +480,7 @@ class FlamesColumn : Motion("FlamesColumn") {
                     for (target in getInColumn(center, r)) {
                         if (damaged.contains(target.entityId)) continue
                         damaged += target.entityId
-                        target.damage(dmg, p)
+                        target.motionDamage(dmg, p, ci.castId)
                         target.fireTicks = fire
                     }
                     if (time >= delay + 10) {
@@ -493,6 +505,9 @@ class FlamesColumn : Motion("FlamesColumn") {
             cloc.y = 0.0
             for (e in center.world.getNearbyEntities(center, search, search, search)) {
                 if (e !is LivingEntity) {
+                    continue
+                }
+                if (isCitizens(e)) {
                     continue
                 }
                 val loc = e.location
@@ -535,16 +550,13 @@ class FlamesColumn : Motion("FlamesColumn") {
 
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            radius = ExpressionHelper.compileExpression(config.getString("radius"))
-            range = ExpressionHelper.compileExpression(config.getString("range"))
-            delay = ExpressionHelper.compileExpression(config.getString("delay"))
-            fireTick = ExpressionHelper.compileExpression(config.getString("fireTick"))
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        radius = ExpressionHelper.compileExpression(config.getString("radius"))
+        range = ExpressionHelper.compileExpression(config.getString("range"))
+        delay = ExpressionHelper.compileExpression(config.getString("delay"))
+        fireTick = ExpressionHelper.compileExpression(config.getString("fireTick"))
+
 
     }
 
@@ -553,24 +565,22 @@ class FlamesColumn : Motion("FlamesColumn") {
 class Damage : Motion("Damage") {
     lateinit var damage: Expression
     lateinit var finder: Finder<LivingEntity>
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val dmg = damage(p).toDouble()
-        for (target in finder(p)) {
-            target.damage(dmg, p)
+        for (target in finder(ci)) {
+            target.motionDamage(dmg, p, ci.castId)
         }
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            val (f, t) = FinderManager.readFinder(config.getString("Finder"))
-            if (t !is EntityFinderTemplate) {
-                throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
-            }
-            finder = f as Finder<LivingEntity>
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        val (f, t) = FinderManager.readFinder(config.getString("Finder"))
+        if (t !is EntityFinderTemplate) {
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
         }
+        finder = f as Finder<LivingEntity>
+
     }
 }
 
@@ -578,28 +588,26 @@ class Knock : Motion("Knock") {
     lateinit var knock: Expression
     lateinit var finder: Finder<LivingEntity>
 
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val k = knock(p).toDouble()
-        for (target in finder(p)) {
+        for (target in finder(ci)) {
             val vec = target.location.toVector().subtract(p.location.toVector())
             vec.y = 1.0
             vec.normalize().multiply(k)
-            target.velocity = vec
+            target.knock(vec, ci.castId)
         }
     }
 
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            knock = ExpressionHelper.compileExpression(config.getString("knock"))
-            val (f, t) = FinderManager.readFinder(config.getString("Finder"))
-            if (t !is EntityFinderTemplate) {
-                throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
-            }
-            finder = f as Finder<LivingEntity>
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
+    override fun loadConfig(config: ConfigurationSection) {
+        knock = ExpressionHelper.compileExpression(config.getString("knock"))
+        val (f, t) = FinderManager.readFinder(config.getString("Finder"))
+        if (t !is EntityFinderTemplate) {
+            throw IllegalArgumentException("配置编写错误 Finder类型不是Entity")
         }
+        finder = f as Finder<LivingEntity>
+
     }
 
 }
@@ -611,7 +619,8 @@ class ShockWave : Motion("ShockWave") {
     lateinit var knock: Expression
     lateinit var speed: Expression //每tick传播的距离
 
-    override fun cast(p: Player) {
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
         val from = p.location
         val effectVec = from.direction.clone()
         effectVec.y = 0.6
@@ -642,17 +651,19 @@ class ShockWave : Motion("ShockWave") {
                     var loc = center.clone().add(a_x.clone().multiply(w))
                     for (e in loc.world.getNearbyEntities(loc, 0.5, 0.5, 0.5)) {
                         if (e !is LivingEntity || damaged.contains(e.entityId)) continue
+                        if (isCitizens(e)) continue
                         damaged += e.entityId
-                        e.damage(damage, p)
-                        e.velocity = effectVec.clone().multiply(knock)
+                        e.motionDamage(damage, p, ci.castId)
+                        e.knock(effectVec.clone().multiply(knock), ci.castId)
                     }
                     playEffect(loc, effectVec)
                     loc = center.clone().add(a_x.clone().multiply(-w))
                     for (e in loc.world.getNearbyEntities(loc, 0.5, 0.5, 0.5)) {
                         if (e !is LivingEntity || damaged.contains(e.entityId)) continue
+                        if (isCitizens(e)) continue
                         damaged += e.entityId
-                        e.damage(damage, p)
-                        e.velocity = effectVec.clone().multiply(knock)
+                        e.motionDamage(damage, p, ci.castId)
+                        e.knock(effectVec.clone().multiply(knock), ci.castId)
                     }
                     playEffect(loc, effectVec)
                     w += 0.5
@@ -663,16 +674,13 @@ class ShockWave : Motion("ShockWave") {
         }.runTaskTimer(Main.Plugin, 1, 1)
     }
 
-    override fun loadConfig(config: ConfigurationSection?) {
-        if (config != null) {
-            damage = ExpressionHelper.compileExpression(config.getString("damage"))
-            length = ExpressionHelper.compileExpression(config.getString("length"))
-            width = ExpressionHelper.compileExpression(config.getString("width"))
-            knock = ExpressionHelper.compileExpression(config.getString("knock"))
-            speed = ExpressionHelper.compileExpression(config.getString("speed"))
-        } else {
-            throw IllegalArgumentException("配置编写错误 缺少配置数据")
-        }
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        length = ExpressionHelper.compileExpression(config.getString("length"))
+        width = ExpressionHelper.compileExpression(config.getString("width"))
+        knock = ExpressionHelper.compileExpression(config.getString("knock"))
+        speed = ExpressionHelper.compileExpression(config.getString("speed"))
+
     }
 
     companion object {
@@ -700,4 +708,17 @@ class ShockWave : Motion("ShockWave") {
         }
     }
 
+}
+
+class TriggerMotion : Motion("Trigger") {
+    lateinit var trigger: Trigger
+
+    override fun loadConfig(config: ConfigurationSection) {
+        trigger = TriggerManager.loadTrigger(config)
+    }
+
+    override fun cast(p: CastInfo) {
+        val cd = SkillManager.castingSkill[p.castId]
+        cd?.triggers?.add(this.trigger)
+    }
 }

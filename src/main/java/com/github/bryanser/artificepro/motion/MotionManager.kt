@@ -1,10 +1,101 @@
 package com.github.bryanser.artificepro.motion
 
+import com.github.bryanser.artificepro.motion.trigger.DamageTrigger
+import com.github.bryanser.artificepro.motion.trigger.EffectTrigger
+import com.github.bryanser.artificepro.motion.trigger.KnockTrigger
+import com.github.bryanser.artificepro.script.finder.isCitizens
+import com.github.bryanser.artificepro.skill.SkillManager
 import org.bukkit.configuration.ConfigurationSection
-import java.lang.IllegalArgumentException
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
+import org.bukkit.util.Vector
+import java.util.*
+
+fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
+    if (isCitizens(this)) {
+        return
+    }
+    MotionManager.motionDamage += this.entityId
+    this.damage(dmg, from)
+    MotionManager.motionDamage -= this.entityId
+    val cd = SkillManager.castingSkill[castId] ?: return
+    if (!cd.skipTrigger) {
+        for (t in cd.triggers) {
+            if (t is DamageTrigger) {
+                if (dmg < t.minDamage(cd.player).toDouble()) {
+                    continue
+                }
+                val maxTime = t.maxTime(cd.player).toInt()
+                if (maxTime > 0) {
+                    val time = cd.triggerTimes.getOrPut(t.triggerId) {
+                        0
+                    }
+                    if (time >= maxTime) {
+                        continue
+                    }
+                    cd.triggerTimes[t.triggerId] = time + 1
+                }
+                t.onTrigger(this, cd.player, castId)
+            }
+        }
+    }
+
+}
+
+fun LivingEntity.knock(vec: Vector, castId: UUID) {
+    if (isCitizens(this)) {
+        return
+    }
+    this.velocity = vec
+    val cd = SkillManager.castingSkill[castId] ?: return
+    if (!cd.skipTrigger) {
+        for (t in cd.triggers) {
+            if (t is KnockTrigger) {
+                val maxTime = t.maxTime(cd.player).toInt()
+                if (maxTime > 0) {
+                    val time = cd.triggerTimes.getOrPut(t.triggerId) {
+                        0
+                    }
+                    if (time >= maxTime) {
+                        continue
+                    }
+                    cd.triggerTimes[t.triggerId] = time + 1
+                }
+                t.onTrigger(this, cd.player, castId)
+            }
+        }
+    }
+}
+
+fun LivingEntity.effect(effect: PotionEffect, castId: UUID) {
+    if (isCitizens(this)) {
+        return
+    }
+    this.addPotionEffect(effect)
+    val cd = SkillManager.castingSkill[castId] ?: return
+    if (!cd.skipTrigger) {
+        for (t in cd.triggers) {
+            if (t is EffectTrigger) {
+                val maxTime = t.maxTime(cd.player).toInt()
+                if (maxTime > 0) {
+                    val time = cd.triggerTimes.getOrPut(t.triggerId) {
+                        0
+                    }
+                    if (time >= maxTime) {
+                        continue
+                    }
+                    cd.triggerTimes[t.triggerId] = time + 1
+                }
+                t.onTrigger(this, cd.player, castId)
+            }
+        }
+    }
+}
 
 object MotionManager {
     private val motions = mutableMapOf<String, Class<out Motion>>()
+    val motionDamage = mutableSetOf<Int>()
     fun init() {
         registerMotion("Scattering", Scattering::class.java)
         registerMotion("Command", Command::class.java)
@@ -18,6 +109,9 @@ object MotionManager {
         registerMotion("Damage", Damage::class.java)
         registerMotion("Knock", Knock::class.java)
         registerMotion("ShockWave", ShockWave::class.java)
+        registerMotion("ParticleLine", ParticleLine::class.java)
+        registerMotion("ParticleCircle", ParticleCircle::class.java)
+        registerMotion("Trigger",TriggerMotion::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
@@ -30,10 +124,13 @@ object MotionManager {
         val t: Motion?
         try {
             t = m.newInstance()
-            t.loadConfig(config.getConfigurationSection("Config"))
+            t.loadConfig(config.getConfigurationSection("Config")
+                    ?: throw IllegalArgumentException("缺少配置项"))
         } catch (e: Exception) {
             throw IllegalArgumentException("读取动作失败@ ${config}", e)
         }
         return t
     }
+
+
 }

@@ -1,16 +1,37 @@
 package com.github.bryanser.artificepro.script
 
 import com.github.bryanser.artificepro.script.finder.*
+import java.lang.StringBuilder
 
 object FinderManager {
     val finderTemplates = mutableMapOf<String, FinderTemplate<*>>()
 
     fun readFinder(func: String): FinderInfo {
-        val sp = func.split("[()]".toRegex(), 3)
+        val sp = func.split("\\(".toRegex(), 2)
+        val args = mutableListOf<String>()
         val t = finderTemplates[sp[0]] ?: throw IllegalArgumentException("找不到名为${sp[0]}的Finder")
-        val arg = sp[1].replace(" ", "").split(",")
+        var deep = 1
+        var str = StringBuilder()
+        for ((i, s) in sp[1].withIndex()) {
+            if (s == '(') {
+                deep++
+            }
+            if (s == ')') {
+                deep--
+            }
+            if (s == ',' && deep == 1) {
+                args += str.toString()
+                str = StringBuilder()
+                continue
+            }
+            if (deep == 0) {
+                args += str.toString()
+                break
+            }
+            str.append(s)
+        }
         try {
-            return FinderInfo(t.read(arg.toTypedArray()), t)
+            return FinderInfo(t.read(args.toTypedArray()), t)
         } catch (e: Exception) {
             throw IllegalArgumentException("Finder编写错误: $func", e)
         }
@@ -24,6 +45,9 @@ object FinderManager {
         finderTemplates[SelfFinder.name] = SelfFinder
         finderTemplates[SectorEntityFinderTemplate.name] = SectorEntityFinderTemplate
         finderTemplates[SectorPlayerFinderTemplate.name] = SectorPlayerFinderTemplate
+        finderTemplates[EntityLocationFinderTemplate.name] = EntityLocationFinderTemplate
+        finderTemplates[SightLocationFinderTemplate.name] = SightLocationFinderTemplate
+        finderTemplates[SelfEntityFinder.name] = SelfEntityFinder
     }
 
 }
