@@ -8,7 +8,7 @@ import java.util.*
 abstract class Motion(
         val name: String
 ) {
-    abstract fun cast(p: CastInfo)
+    abstract fun cast(ci: CastInfo)
 
     abstract fun loadConfig(config: ConfigurationSection)
 }

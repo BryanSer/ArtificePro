@@ -1,6 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
-import com.github.bryanser.artificepro.Tools
+import com.github.bryanser.artificepro.tools.Tools
 import org.bukkit.entity.Player
 
 /*

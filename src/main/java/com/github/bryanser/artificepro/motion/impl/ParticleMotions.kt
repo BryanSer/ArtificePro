@@ -1,6 +1,8 @@
-package com.github.bryanser.artificepro.motion
+package com.github.bryanser.artificepro.motion.impl
 
 import com.github.bryanser.artificepro.Main
+import com.github.bryanser.artificepro.motion.CastInfo
+import com.github.bryanser.artificepro.motion.Motion
 import com.github.bryanser.artificepro.particle.Particle
 import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.script.Expression
@@ -11,8 +13,6 @@ import com.github.bryanser.artificepro.script.finder.LocationFinderTemplate
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.entity.Player
-import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,7 +47,7 @@ class ParticleLine : Motion("ParticleLine") {
             throw IllegalArgumentException("配置编写错误 Finder1类型不是Location")
         }
         finder1 = f1 as Finder<Location>
-        particle = ParticleManager.readParticleManager(config.getString("Particle"))
+        particle = ParticleManager.readParticle(config.getString("Particle"))
 
     }
 
@@ -82,7 +82,7 @@ class ParticleCircle : Motion("ParticleCircle") {
             throw IllegalArgumentException("配置编写错误 Finder类型不是Location")
         }
         finder = f0 as Finder<Location>
-        particle = ParticleManager.readParticleManager(config.getString("Particle"))
+        particle = ParticleManager.readParticle(config.getString("Particle"))
         r = ExpressionHelper.compileExpression(config.getString("r"))
         p = ExpressionHelper.compileExpression(config.getString("p"))
     }

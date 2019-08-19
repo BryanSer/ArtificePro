@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.motion
 
+import com.github.bryanser.artificepro.motion.impl.*
 import com.github.bryanser.artificepro.motion.trigger.DamageTrigger
 import com.github.bryanser.artificepro.motion.trigger.EffectTrigger
 import com.github.bryanser.artificepro.motion.trigger.KnockTrigger
@@ -111,7 +112,10 @@ object MotionManager {
         registerMotion("ShockWave", ShockWave::class.java)
         registerMotion("ParticleLine", ParticleLine::class.java)
         registerMotion("ParticleCircle", ParticleCircle::class.java)
-        registerMotion("Trigger",TriggerMotion::class.java)
+        registerMotion("Trigger", TriggerMotion::class.java)
+        registerMotion("Launch", Launch::class.java)
+        registerMotion("LaunchGuided", LaunchGuided::class.java)
+        registerMotion("ShockWavePull", ShockWavePull::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

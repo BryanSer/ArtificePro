@@ -25,13 +25,13 @@ Motions:
             minDamage: 10
             #执行的动作
             #给命中的人一个粒子圈
-            motion:
+            Motion:
                 Name: 'ParticleCircle'
                 Config:
-                    Finder: 'EntityLocation(SelfEntity())'
+                    Finder: EntityLocation(SelfEntity())
                     r: 1.5
                     p: 12
-                    Particle: Flame
+                    Particle: Flame(2,0,0,0,1)
     #这个填什么都行 反正会按顺序执行
     '1':
         #至少要多少级才能执行这个动作
