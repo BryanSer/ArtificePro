@@ -7,6 +7,7 @@ object ParticleManager {
         register("ColorDust", ColorDust::class.java)
         register("Flame", Flame::class.java)
         register("SweepAttack", SweepAttack::class.java)
+        register("Particle", ParticleImpl::class.java)
     }
 
     fun register(name: String, clazz: Class<out Particle>) {
@@ -17,7 +18,10 @@ object ParticleManager {
         val sp = str.split("[()]".toRegex(), 2)
         val clazz = particle[sp[0]] ?: throw IllegalArgumentException("找不到名为${sp[0]}的Particle")
         val p = clazz.newInstance()
-        p.init(sp[1].replace(")", "").split(",").toTypedArray())
+        try {
+            p.init(sp[1].replace(")", "").split(",").toTypedArray())
+        } catch (e: Throwable) {
+        }
         return p
     }
 }

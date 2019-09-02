@@ -4,6 +4,7 @@ import com.github.bryanser.artificepro.mana.ManaManager
 import com.github.bryanser.artificepro.motion.MotionManager
 import com.github.bryanser.artificepro.motion.trigger.TriggerManager
 import com.github.bryanser.artificepro.particle.ParticleManager
+import com.github.bryanser.artificepro.passive.PassiveManager
 import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ScriptManager
@@ -30,6 +31,7 @@ class Main : JavaPlugin() {
             return
         }
         SkillManager.loadConfig()
+        PassiveManager.init()
         ManaManager.usingManage
     }
 
@@ -68,6 +70,7 @@ class Main : JavaPlugin() {
         }
         if(args[0].equals("reload",true)&& sender.isOp){
             SkillManager.loadConfig()
+            PassiveManager.init()
             sender.sendMessage("§6重载完成")
             return true
         }

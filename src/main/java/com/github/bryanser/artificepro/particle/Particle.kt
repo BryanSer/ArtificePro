@@ -48,6 +48,7 @@ class ColorDust : Particle("ColorDust") {
     override fun init(args: Array<String>) {
         color = ParticleEffect.OrdinaryColor(args[0].toInt(), args[1].toInt(), args[2].toInt())
     }
+
     override fun getParticleEffect(): ParticleEffect? = ParticleEffect.REDSTONE
 
     override fun display(loc: Location) {
@@ -74,6 +75,19 @@ class Flame : Particle("Flame") {
 
     override fun display(loc: Location) {
         ParticleEffect.FLAME.display(offsetx, offsety, offsetz, speed, amount, loc, 50.0)
+    }
+
+}
+
+class ParticleImpl : Particle("Particle") {
+    lateinit var effect: ParticleEffect
+    override fun getParticleEffect(): ParticleEffect? = effect
+    override fun init(args: Array<String>) {
+        effect = ParticleEffect.valueOf(args[0])
+    }
+
+    override fun display(loc: Location) {
+        effect.display(0f, 0f, 0f, 0.25f, 1, loc, 50.0)
     }
 
 }

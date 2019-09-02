@@ -13,15 +13,22 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.util.Vector
 import java.util.*
 
+val ignoreAttack = mutableSetOf<Int>()
 fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
     if (isCitizens(this)) {
         return
     }
     MotionManager.motionDamage += this.entityId
+    val cd = SkillManager.castingSkill[castId]
+    if (cd != null && cd.passive) {
+        ignoreAttack += this.entityId
+    }
     this.damage(dmg, from)
+    if (cd != null && cd.passive) {
+        ignoreAttack -= this.entityId
+    }
     MotionManager.motionDamage -= this.entityId
-    val cd = SkillManager.castingSkill[castId] ?: return
-    if (!cd.skipTrigger) {
+    if (cd != null && !cd.skipTrigger) {
         for (t in cd.triggers) {
             if (t is DamageTrigger) {
                 if (dmg < t.minDamage(cd.player).toDouble()) {
@@ -116,6 +123,10 @@ object MotionManager {
         registerMotion("Launch", Launch::class.java)
         registerMotion("LaunchGuided", LaunchGuided::class.java)
         registerMotion("ShockWavePull", ShockWavePull::class.java)
+        registerMotion("LaunchRain", LaunchRain::class.java)
+        registerMotion("Lightning", Lightning::class.java)
+        registerMotion("ParticleOval", ParticleOval::class.java)
+        registerMotion("GreatLight",GreatLight::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

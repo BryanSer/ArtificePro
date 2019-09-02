@@ -6,8 +6,10 @@ import java.util.*
 
 data class CastData(
         val playerName: String,
-        val castId: UUID
+        val castId: UUID,
+        val passive:Boolean = false
 ) {
+    var level: Int = 0
     val triggers = mutableListOf<Trigger>()
     var skipTrigger: Boolean = false
 

@@ -1,0 +1,31 @@
+#被动的名字
+#拥有权限artificepro.passive.example
+Name: p_example
+#冷却时间 单位毫秒
+Cooldown: 40
+#这个被动能升级的最大等级
+#等级通过权限 artificepro.plevel.example.数字 来给予 高的会优先读取
+#玩家没有任何等级权限 默认等级为0
+#此外 所有表达式中 技能等级为%level%
+MaxLevel: 10
+#被动类型
+#请在表格中查看被动类型
+Type: PERMANENT
+#动作序列 和技能一致
+#本范例写的是一个治疗光环
+Motions:
+    '0':
+        Level: 0
+        Name: ParticleCircle
+        Config:
+            Finder: Self()
+            r: 3
+            p: 12
+            Particle: ColorDust(0,255,0)
+    '1':
+        Level: 0
+        Name: Heal
+        Config:
+            amount: '1 + %level%'
+            percentage: false
+            Finder: RangePlayer(3,0,true)

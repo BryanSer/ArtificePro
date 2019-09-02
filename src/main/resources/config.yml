@@ -14,4 +14,4 @@ Mana:
             return max;
         }
     #每秒钟回复速度(支持表达式)
-    ManaRecover: 1
+    ManaRecover: 1+%player.level% * 0.2

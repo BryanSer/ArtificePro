@@ -1,23 +1,24 @@
-package com.github.bryanser.artificepro.skill
+package com.github.bryanser.artificepro.passive
 
 import com.github.bryanser.artificepro.CastData
 import com.github.bryanser.artificepro.Main
-import com.github.bryanser.artificepro.mana.ManaManager
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
+import com.github.bryanser.artificepro.skill.Castable
+import com.github.bryanser.artificepro.skill.IStep
+import com.github.bryanser.artificepro.skill.SkillManager
+import com.github.bryanser.artificepro.skill.Step
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import java.util.*
 
-class Skill(
-        config: ConfigurationSection
-) : Castable {
-    override val name: String = config.getString("Name")
+class Passive(config: ConfigurationSection)  {
+    val name: String = config.getString("Name")
     val cooldown: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
-    val manaCost: Expression = ExpressionHelper.compileExpression(config.getString("ManaCost"))
     val maxLevel: Int = config.getInt("MaxLevel")
     val firstStep: Step
+    val type:Type = Type.valueOf(config.getString("Type"))
     private val lastCast = mutableMapOf<String, Long>()
 
     init {
@@ -35,42 +36,47 @@ class Skill(
             override fun cast(p: Player, lv: Int, castId: UUID) {
                 Bukkit.getScheduler().runTaskLater(Main.Plugin, {
                     SkillManager.castingSkill.remove(castId)
+                    PassiveManager.attackEntity.remove(castId)
+                    PassiveManager.defenceEntity.remove(castId)
+
                 }, 600)
             }
         }
         firstStep = steps.first()
     }
-
-    override fun cast(p: Player, level: Int) {
-        val cost = manaCost(p).toDouble()
-        if (!ManaManager.usingManage.hasMana(p, cost)) {
-            p.sendMessage("§c你没有足够的蓝释放这个技能")
-            return
-        }
+    fun cast(p: Player,data:CastData, level: Int= -1) {
         val last = lastCast[p.name] ?: 0L
         val cd = cooldown(p).toLong()
         val pass = System.currentTimeMillis() - last
         if (pass < cd) {
-            p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
             return
         }
-        ManaManager.usingManage.costMana(p, cost)
         var lv = level
-        if (lv == -1) {
-            lv = maxLevel
-            while (lv > 0) {
-                if (p.hasPermission("artificepro.level.${name}.$lv")) {
-                    break
-                }
-                lv--
-            }
-        }
         ExpressionHelper.levelHolder[p.entityId] = lv
-        val castId = UUID.randomUUID()
-        val data = CastData(p.name, castId)
+        val castId = data.castId
         data.level = lv
         SkillManager.castingSkill[castId] = data
         firstStep.cast(p, lv, castId)
         lastCast[p.name] = System.currentTimeMillis()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Passive
+
+        if (name != other.name) return false
+        if (maxLevel != other.maxLevel) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + maxLevel
+        return result
+    }
+
+
 }

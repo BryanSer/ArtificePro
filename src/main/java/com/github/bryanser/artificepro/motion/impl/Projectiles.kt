@@ -5,6 +5,8 @@ import com.github.bryanser.artificepro.motion.CastInfo
 import com.github.bryanser.artificepro.motion.Motion
 import com.github.bryanser.artificepro.motion.ProjectileType
 import com.github.bryanser.artificepro.motion.motionDamage
+import com.github.bryanser.artificepro.particle.Particle
+import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
 import com.github.bryanser.artificepro.script.FinderManager
@@ -13,21 +15,28 @@ import com.github.bryanser.artificepro.script.finder.Finder
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.artificepro.tools.Tools
 import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.PlayerPickupArrowEvent
 import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.util.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 const val METADATA_KEY: String = "artificepro_projectile_damage"
 const val METADATA_UUID: String = "artificepro_projectile_uuid"
+
 class Launch : Motion("Launch") {
 
     lateinit var damage: Expression
@@ -178,11 +187,30 @@ class Scattering : Motion(
             }
         }
 
+        @EventHandler
+        fun onFire(evt: BlockIgniteEvent) {
+            if (evt.ignitingEntity != null){
+                if(evt.ignitingEntity.hasMetadata(METADATA_KEY)){
+                    evt.isCancelled = true
+                }
+            }
+
+        }
+
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
         fun onPick(evt: PlayerPickupArrowEvent) {
             if (evt.arrow.hasMetadata(METADATA_KEY)) {
                 evt.isCancelled = true
                 evt.arrow.remove()
+            }
+        }
+
+        @EventHandler
+        fun onHit(evt: ProjectileHitEvent) {
+            if (evt.entity.hasMetadata(METADATA_KEY)) {
+                Bukkit.getScheduler().runTaskLater(Main.Plugin, {
+                    evt.entity.remove()
+                }, 1)
             }
         }
 
@@ -244,6 +272,78 @@ class GuidedArrow : Motion("GuidedArrow") {
         }
         finder = f as Finder<LivingEntity>
 
+    }
+
+}
+
+class LaunchRain : Motion("LaunchRain") {
+    lateinit var damage: Expression
+    lateinit var amount: Expression
+    lateinit var totalAmount: Expression
+    lateinit var radius: Expression
+    lateinit var range: Expression
+    var projectileType = ProjectileType.ARROW
+    lateinit var particle: Particle
+
+    override fun cast(ci: CastInfo) {
+        val p = ci.caster
+        val dmg = damage(p).toDouble()
+        val amt = amount(p).toInt()
+        val tamt = totalAmount(p).toInt()
+        val r = radius(p).toDouble()
+        val rng = range(p).toInt()
+        val target = p.getTargetBlock(setOf(Material.AIR), rng)?.location ?: return
+        object : BukkitRunnable() {
+            var launched = 0
+            override fun run() {
+                if (launched >= tamt) {
+                    this.cancel()
+                    return
+                }
+                repeat(amt) {
+                    val loc = randomLocation(target, r)
+                    loc.world.spawn(loc, projectileType.clazz) {
+                        it.setMetadata(METADATA_UUID, FixedMetadataValue(Main.Plugin, ci.castId.toString()))
+                        it.setMetadata(METADATA_KEY, FixedMetadataValue(Main.Plugin, dmg))
+                        it.velocity = Vector(0.0, -1.2, 0.0)
+                    }
+                }
+                val pp = 12
+                val loc = target
+                Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
+                    var st = 0.0
+                    val add = Math.PI / pp
+                    while (st <= Math.PI * 2) {
+                        val x = cos(st) * r
+                        val z = sin(st) * r
+                        val loc = loc.clone().add(x, 0.0, z)
+                        particle.play(loc)
+                        st += add
+                    }
+                }
+                launched += amt
+            }
+        }.runTaskTimer(Main.Plugin, 10, 10)
+    }
+
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        amount = ExpressionHelper.compileExpression(config.getString("amount"))
+        totalAmount = ExpressionHelper.compileExpression(config.getString("totalAmount"))
+        radius = ExpressionHelper.compileExpression(config.getString("radius"))
+        range = ExpressionHelper.compileExpression(config.getString("range"))
+        projectileType = ProjectileType.valueOf(config.getString("ProjectileType", "ARROW"))
+        particle = ParticleManager.readParticle(config.getString("Particle","ColorDust(255,0,0)"))
+    }
+
+    companion object {
+        fun randomLocation(center: Location, r: Double): Location {
+            val st = Math.random() * Math.PI * 2
+            val p = Math.random() * r
+            val ox = cos(st) * p
+            val oz = sin(st) * p
+            return center.clone().add(ox, 10.0, oz)
+        }
     }
 
 }

@@ -1,10 +1,12 @@
 package com.github.bryanser.artificepro.motion.impl
 
 import Br.API.ParticleEffect.ParticleEffect
+import Br.API.Utils
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.artificepro.motion.*
 import com.github.bryanser.artificepro.motion.trigger.Trigger
 import com.github.bryanser.artificepro.motion.trigger.TriggerManager
+import com.github.bryanser.artificepro.particle.ColorDust
 import com.github.bryanser.artificepro.particle.Particle
 import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.script.Expression
@@ -17,6 +19,9 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.LivingEntity
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import kotlin.math.cos
@@ -168,9 +173,10 @@ class FlamesColumn : Motion("FlamesColumn") {
     lateinit var range: Expression
     lateinit var delay: Expression
     lateinit var fireTick: Expression
+    var particle: Particle? = null
     override fun cast(ci: CastInfo) {
         val p = ci.caster
-        var b = p.getTargetBlock(mutableSetOf<Material>(Material.AIR), range(p).toInt()).location
+        var b = p.getTargetBlock(mutableSetOf(Material.AIR), range(p).toInt()).location
         while (b.block.type == Material.AIR && b.y > 0) {
             b.add(0.0, -1.0, 0.0)
         }
@@ -180,13 +186,13 @@ class FlamesColumn : Motion("FlamesColumn") {
         val r = radius(p).toDouble()
         val fire = fireTick(p).toInt()
         object : BukkitRunnable() {
-            val damaged = mutableSetOf<Int>(p.entityId)
+            val damaged = mutableSetOf(p.entityId)
             var time = 0
             override fun run() {
                 if (time++ >= delay) {
                     if (time % 2 == 0)
                         Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
-                            drawColumn(center.clone(), r)
+                            drawColumn(center.clone(), r, particle)
                         }
                     for (target in getInColumn(center, r)) {
                         if (damaged.contains(target.entityId)) continue
@@ -200,7 +206,7 @@ class FlamesColumn : Motion("FlamesColumn") {
                     return
                 }
                 Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
-                    drawCircle(center, r)
+                    drawCircle(center, r, par = particle)
                 }
             }
         }.runTaskTimer(Main.Plugin, 1, 1)
@@ -230,32 +236,37 @@ class FlamesColumn : Motion("FlamesColumn") {
             return list
         }
 
-        private fun drawCircle(center: Location, r: Double, fill: Boolean = false) {
+        private fun drawCircle(center: Location, r: Double, fill: Boolean = false, par: Particle?) {
             var st = 0.0
             while (st < Math.PI * 2) {
-                st += Math.PI / if (fill) 6 else 12
+                st += Math.PI / if (fill) 6 else 9
                 val x = cos(st)
                 val z = sin(st)
                 val loc = center.clone().add(x * r, 0.0, z * r)
-                ParticleEffect.FLAME.display(0.0f, 0f, 0f, 0F, 2, loc, 50.0)
+                if (par == null)
+                    ParticleEffect.FLAME.display(0.0f, 0f, 0f, 0F, 2, loc, 50.0)
+                else par.play(loc)
                 //fire.playParticle(loc, 50.0)
                 if (fill) {
-                    val del = r / 3
+                    val del = r / 2
                     var r = r - del
                     while (r > 0) {
                         val vec = Vector.getRandom().multiply(0.1)
                         val loc = center.clone().add(x * r, 0.0, z * r)
-                        ParticleEffect.FLAME.display(vec.x.toFloat(), vec.y.toFloat() * 2, vec.z.toFloat(), 0.03F, 7, loc, 50.0)
+
+                        if (par == null)
+                            ParticleEffect.FLAME.display(vec.x.toFloat(), vec.y.toFloat() * 2, vec.z.toFloat(), 0.03F, 7, loc, 50.0)
+                        else par.play(loc)
                         r -= del
                     }
                 }
             }
         }
 
-        private fun drawColumn(center: Location, r: Double) {
-            for (i in 1..5) {
-                center.add(0.0, 0.6, 0.0)
-                drawCircle(center, r, true)
+        private fun drawColumn(center: Location, r: Double, par: Particle?) {
+            for (i in 1..3) {
+                center.add(0.0, 1.0, 0.0)
+                drawCircle(center, r, true, par)
             }
         }
 
@@ -267,6 +278,9 @@ class FlamesColumn : Motion("FlamesColumn") {
         range = ExpressionHelper.compileExpression(config.getString("range"))
         delay = ExpressionHelper.compileExpression(config.getString("delay"))
         fireTick = ExpressionHelper.compileExpression(config.getString("fireTick"))
+        if (config.contains("particle")) {
+            particle = ParticleManager.readParticle(config.getString("particle"))
+        }
 
 
     }
@@ -496,5 +510,116 @@ class TriggerMotion : Motion("Trigger") {
     override fun cast(p: CastInfo) {
         val cd = SkillManager.castingSkill[p.castId]
         cd?.triggers?.add(this.trigger)
+    }
+}
+
+class GreatLight : Motion("GreatLight") {
+    lateinit var damage: Expression
+    lateinit var length: Expression
+    lateinit var radius: Expression
+    lateinit var delay: Expression
+    override fun cast(ci: CastInfo) {
+        if (casting.contains(ci.caster.entityId)) {
+            return
+        }
+        casting += ci.caster.entityId
+        val dmg = damage(ci.caster).toDouble()
+        val length = length(ci.caster).toDouble()
+        val radius = radius(ci.caster).toDouble()
+        val delay = delay(ci.caster).toInt()
+        object : BukkitRunnable() {
+            var time = 0
+            val from = ci.caster.eyeLocation.add(0.0, -0.25, 0.0)
+            val vec = from.direction.normalize()
+            override fun run() {
+                if (time < delay) {
+                    Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
+                        var l = 0.0
+                        while (l < length) {
+                            l += 0.2
+                            val t = vec.clone().multiply(l)
+                            val target = from.clone().add(t)
+                            centerParticle.play(target)
+                        }
+                    }
+                } else {
+                    var l = 0.0
+                    val damage = mutableSetOf<LivingEntity>()
+                    while (l < length) {
+                        l += 0.25
+                        val t = vec.clone().multiply(l)
+                        val target = from.clone().add(t)
+                        for (e in target.world.getNearbyEntities(target, radius * 1.44, radius * 1.44, radius * 1.44)) {
+                            if (e !is LivingEntity || e == ci.caster) {
+                                continue
+                            }
+                            val eloc = e.eyeLocation
+                            val c = from.toVector().subtract(eloc.toVector()).getCrossProduct(vec)
+                            val r = c.length()
+                            if (r < radius) {
+                                damage += e
+                            }
+                        }
+                        val tl = l
+                        Bukkit.getScheduler().runTaskAsynchronously(Main.Plugin) {
+                            val proj = Utils.Coordinate.create2DProjector(target, vec)
+                            var st = 0.0
+                            while (st <= Math.PI * 2) {
+                                val x = cos(st)
+                                val z = sin(st)
+                                var r = 0.0
+                                while (r <= radius) {
+                                    val x = x * r
+                                    val z = z * r
+                                    val eff = proj.apply(x, z)
+                                    eff.add(vec.clone().multiply(tl))
+                                    damageParticle.play(eff)
+                                    r += radius / 6.0
+                                }
+                                st += Math.PI / 6
+                            }
+                        }
+                        for (e in damage) {
+                            e.motionDamage(dmg, ci.caster, ci.castId)
+                        }
+
+                    }
+
+                    damage.clear()
+                    this.cancel()
+                    casting -= ci.caster.entityId
+                    return
+                }
+                time++
+            }
+
+        }.runTaskTimer(Main.Plugin, 1, 1)
+    }
+
+    override fun loadConfig(config: ConfigurationSection) {
+        damage = ExpressionHelper.compileExpression(config.getString("damage"))
+        length = ExpressionHelper.compileExpression(config.getString("length"))
+        radius = ExpressionHelper.compileExpression(config.getString("radius"))
+        delay = ExpressionHelper.compileExpression(config.getString("delay"))
+    }
+
+    companion object : Listener {
+        val centerParticle = ColorDust()
+        val damageParticle = ColorDust()
+
+        val casting = mutableSetOf<Int>()
+
+        init {
+            Bukkit.getPluginManager().registerEvents(this, Main.Plugin)
+            centerParticle.init(arrayOf("255", "0", "0"))
+            damageParticle.init(arrayOf("255", "255", "0"))
+        }
+
+        @EventHandler
+        fun onMove(evt: PlayerMoveEvent) {
+            if (casting.contains(evt.player.entityId)) {
+                evt.isCancelled = true
+            }
+        }
     }
 }

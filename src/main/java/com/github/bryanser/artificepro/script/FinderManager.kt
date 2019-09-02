@@ -48,6 +48,10 @@ object FinderManager {
         finderTemplates[EntityLocationFinderTemplate.name] = EntityLocationFinderTemplate
         finderTemplates[SightLocationFinderTemplate.name] = SightLocationFinderTemplate
         finderTemplates[SelfEntityFinder.name] = SelfEntityFinder
+        finderTemplates[AttackTargetEntityTemplate.name] = AttackTargetEntityTemplate
+        finderTemplates[DefenceFromEntityTemplate.name] = DefenceFromEntityTemplate
+        finderTemplates[AttackTargetPlayerTemplate.name] = AttackTargetPlayerTemplate
+        finderTemplates[DefenceFromPlayerTemplate.name] = DefenceFromPlayerTemplate
     }
 
 }

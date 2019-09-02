@@ -1,7 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
 import com.github.bryanser.artificepro.motion.CastInfo
-import com.github.bryanser.artificepro.script.FinderManager
 import net.citizensnpcs.api.CitizensAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -32,24 +31,34 @@ abstract class FinderTemplate<out F : Any>(
     abstract fun read(args: Array<String>): Finder<F>
 }
 
-data class Finder<out F>(
-        val finder: (LivingEntity) -> Collection<F>
-) {
-    operator fun invoke(p: CastInfo): Collection<F> {
-        if (enableCitizensAPI) {
-            return finder(p.finder()).filter { t ->
-                if (t is Entity)
-                    if (isCitizens(t)) {
-                        return@filter false
-                    }
-                true
-            }
+
+interface Finder<out F> {
+    fun finder(p:LivingEntity): Collection<F>
+    operator fun invoke(p: CastInfo): Collection<F>
+}
+
+fun <F> Finder(f: (LivingEntity) -> Collection<F>): Finder<F> {
+    return object : Finder<F> {
+        override fun finder(p: LivingEntity): Collection<F> {
+            return f(p)
         }
-        return finder(p.finder())
+
+        override fun invoke(p: CastInfo): Collection<F> {
+            if (enableCitizensAPI) {
+                return f(p.finder()).filter { t ->
+                    if (t is Entity)
+                        if (isCitizens(t)) {
+                            return@filter false
+                        }
+                    true
+                }
+            }
+            return f(p.finder())
+        }
 
     }
-
 }
+
 
 abstract class LocationFinderTemplate(name: String) : FinderTemplate<Location>(name)
 

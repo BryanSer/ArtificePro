@@ -426,7 +426,9 @@ public enum ParticleEffect {
      * </ul>
      */
     MOB_APPEARANCE("mobappearance", 41, 8),
-    SWEEPATTACK("sweepattack", 45, 9);
+    DRAGON_BREATH("dragonbreath", 42, 9),
+
+    SWEEPATTACK("sweepattack",45,9);
 
     private static final Map<String, ParticleEffect> NAME_MAP = new HashMap<>();
     private static final Map<Integer, ParticleEffect> ID_MAP = new HashMap<>();
@@ -1792,4 +1794,4 @@ public enum ParticleEffect {
             }
         }
     }
-}
+    }

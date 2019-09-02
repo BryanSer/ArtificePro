@@ -24,14 +24,28 @@ class Step(
     init {
 
         if (config.getString("Name") == "Delay") {
-            val time = config.getLong("Config.Time")
+            val time = ExpressionHelper.compileExpression(config.getString("Config.Time"))
             run = { it, lv, castID ->
                 Bukkit.getScheduler().runTaskLater(Main.Plugin, {
                     if (next != null) {
                         ExpressionHelper.levelHolder[it.entityId] = lv
                         next!!.cast(it, lv, castID)
                     }
-                }, time)
+                }, time(it).toLong())
+            }
+        }else if(config.getString("Name") == "Chance"){
+            val chance = ExpressionHelper.compileExpression(config.getString("Config.Chance"))
+            run = { it, lv, castID ->
+                val c = chance(it).toDouble()
+                if(Math.random() <= c){
+                    if (next != null) {
+                        next!!.cast(it, lv, castID)
+                    }
+                }else{
+                    Bukkit.getScheduler().runTaskLater(Main.Plugin, {
+                        SkillManager.castingSkill.remove(castID)
+                    }, 600)
+                }
             }
         } else {
             val motion = MotionManager.loadMotion(config)
