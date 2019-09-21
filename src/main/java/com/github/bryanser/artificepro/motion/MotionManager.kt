@@ -18,6 +18,9 @@ fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
     if (isCitizens(this)) {
         return
     }
+    if(from === this){
+        return
+    }
     MotionManager.motionDamage += this.entityId
     val cd = SkillManager.castingSkill[castId]
     if (cd != null && cd.passive) {
@@ -127,6 +130,7 @@ object MotionManager {
         registerMotion("Lightning", Lightning::class.java)
         registerMotion("ParticleOval", ParticleOval::class.java)
         registerMotion("GreatLight",GreatLight::class.java)
+        registerMotion("BuffZone",BuffZone::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

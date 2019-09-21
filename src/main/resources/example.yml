@@ -29,7 +29,7 @@ Motions:
                 Name: 'ParticleCircle'
                 Config:
                     Finder: EntityLocation(SelfEntity())
-                    r: 1.5
+                    r: 1.5 
                     p: 12
                     Particle: Flame(2,0,0,0,1)
     #这个填什么都行 反正会按顺序执行
@@ -42,9 +42,9 @@ Motions:
         #每个动作接受的配置不一样 这个后面会给你表格
         Config:
             #散射剑的伤害
-            damage: '20'
+            damage: '20 + 2 * %level%'
             #散射的数量
-            amount: '10'
+            amount: '10 + 1 * %level%'
     '2':
         #至少要多少级才能执行这个动作
         Level: 0
@@ -84,4 +84,19 @@ Motions:
             Commands:
                 - 'c:tell %target% 你收到了%from%的视线'
             Finder: SightPlayer(20)
-    
+    '5':
+        Level: 0
+        Name: 'BuffZone'
+        Config:
+            length: '25'
+            radius: '3'
+            time: '200'
+            triggerTick: '2'
+            Particle: Flame(2,0,0,0,1)
+            Motions:
+                '0':
+                    Name: 'Heal'
+                    Config:
+                        amount: '1'
+                        percentage: false
+                        Finder: AttackTargetPlayer()

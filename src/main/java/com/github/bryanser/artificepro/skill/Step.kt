@@ -17,6 +17,7 @@ interface IStep {
 class Step(
         config: ConfigurationSection
 ) : IStep {
+
     var next: IStep? = null
     val level: Int = config.getInt("Level")
     val run: (Player, Int, UUID) -> Unit

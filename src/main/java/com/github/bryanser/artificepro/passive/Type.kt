@@ -25,6 +25,7 @@ enum class Type : Listener {
         @EventHandler
         fun onAttack(evt: EntityDamageByEntityEvent) {
             if (ignoreAttack.contains(evt.entity.entityId)) return
+            if (ignoreAttack.contains(evt.damager.entityId)) return
             val damager = evt.damager as? Player ?: return
             val entity = evt.entity as? LivingEntity ?: return
             val uuid = UUID.randomUUID()
@@ -41,6 +42,7 @@ enum class Type : Listener {
         @EventHandler
         fun onAttack(evt: EntityDamageByEntityEvent) {
             if (ignoreAttack.contains(evt.entity.entityId)) return
+            if (ignoreAttack.contains(evt.damager.entityId)) return
             val damager = evt.damager as? LivingEntity ?: return
             val entity = evt.entity as? Player ?: return
             val uuid = UUID.randomUUID()
