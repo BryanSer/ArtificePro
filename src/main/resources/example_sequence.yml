@@ -1,0 +1,69 @@
+#注意 本文件表示序列技能
+#一个文件一个 序列 技能
+#通过命令/ap cast example释放 需要权限 artificepro.cast.example
+Name: 'example'
+#本序列的全局冷却时间 单位毫秒
+#会在最后一个序列执行完成后计算
+Cooldown: 5000 - 500 * %level%
+ManaCost: 100
+#这个技能能升级的最大等级
+#等级通过权限 artificepro.level.example.数字 来给予 高的会优先读取
+#玩家没有任何等级权限 默认等级为0
+#此外 所有表达式中 技能等级为%level%
+MaxLevel: 10
+#开始释放技能后能够释放下一个序列的时间
+#如果经过了配置设定的时间玩家没有使用这个技能 将会进入全局冷却
+#填写-1禁用这个功能 单位毫秒 !不支持表达式!
+MaxHoldingTime: 5000
+#定义序列
+SequenceSetting:
+    #设定本文件的最大序列数
+    MaxSequence: 3
+    Sequence:
+        #第一个序列
+        '1':
+            #执行完本序列后到可执行下一个序列的冷却时间 毫秒
+            Cooldown: 1000
+            #和标准技能写法一致
+            Motions:
+                '0':
+                    #动作名 这个后面会告诉你 Scattering是散射
+                    Name: 'Scattering'
+                    #设定本动作的配置
+                    #每个动作接受的配置不一样 这个后面会给你表格
+                    Config:
+                        #散射剑的伤害
+                        damage: '20 + 2 * %level%'
+                        #散射的数量
+                        amount: '10 + 1 * %level%'
+        '2':
+            #执行完本序列后到可执行下一个序列的冷却时间 毫秒
+            Cooldown: 1000
+            #和标准技能写法一致
+            Motions:
+                '0':
+                    #动作名 这个后面会告诉你 Scattering是散射
+                    Name: 'Scattering'
+                    #设定本动作的配置
+                    #每个动作接受的配置不一样 这个后面会给你表格
+                    Config:
+                        #散射剑的伤害
+                        damage: '20 + 2 * %level%'
+                        #散射的数量
+                        amount: '10 + 1 * %level%'
+        '3':
+            #执行完本序列后到可执行下一个序列的冷却时间 毫秒
+            Cooldown: 1000
+            #和标准技能写法一致
+            Motions:
+                '0':
+                    #动作名 这个后面会告诉你 Scattering是散射
+                    Name: 'Scattering'
+                    #设定本动作的配置
+                    #每个动作接受的配置不一样 这个后面会给你表格
+                    Config:
+                        #散射剑的伤害
+                        damage: '20 + 2 * %level%'
+                        #散射的数量
+                        amount: '10 + 1 * %level%'
+            

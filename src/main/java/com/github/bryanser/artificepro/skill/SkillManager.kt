@@ -2,6 +2,7 @@ package com.github.bryanser.artificepro.skill
 
 import com.github.bryanser.artificepro.CastData
 import com.github.bryanser.artificepro.Main
+import com.github.bryanser.artificepro.skill.sequence.SequenceSkill
 import com.github.bryanser.brapi.Utils
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
@@ -32,6 +33,25 @@ object SkillManager {
                 Bukkit.getLogger().log(Level.WARNING, e, { "[ArtificePro] 读取文件: ${f.path}时出错" })
             }
         }
+        loadSequence()
+    }
+
+    fun loadSequence(){
+        val folder = File(Main.dataFolder, "${File.separator}sequences${File.separator}")
+        if (!folder.exists()) {
+            folder.mkdirs()
+            Utils.saveResource(Main.Plugin, "example_sequence.yml", folder)
+        }
+        for (f in folder.listFiles()) {
+            val config = YamlConfiguration.loadConfiguration(f)
+            try {
+                val skill = SequenceSkill(config)
+                skills[skill.name] = skill
+            } catch (e: Exception) {
+                Bukkit.getLogger().log(Level.WARNING, e, { "[ArtificePro] 读取文件: ${f.path}时出错" })
+            }
+        }
+
     }
 
     fun playerCastSkill(p: Player, skill: String) {

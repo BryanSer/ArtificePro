@@ -91,8 +91,11 @@ Motions:
             length: '25'
             radius: '3'
             time: '200'
+            once: true
             triggerTick: '2'
-            Particle: Flame(2,0,0,0,1)
+            Particle:
+                - 0.0,Flame(2,0,0,0,1)
+                - 1.0,Flame(2,0,0,0,1)
             Motions:
                 '0':
                     Name: 'Heal'

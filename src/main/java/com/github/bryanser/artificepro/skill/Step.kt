@@ -19,7 +19,7 @@ class Step(
 ) : IStep {
 
     var next: IStep? = null
-    val level: Int = config.getInt("Level")
+    val level: Int = config.getInt("Level", 0)
     val run: (Player, Int, UUID) -> Unit
 
     init {
@@ -34,15 +34,15 @@ class Step(
                     }
                 }, time(it).toLong())
             }
-        }else if(config.getString("Name") == "Chance"){
+        } else if (config.getString("Name") == "Chance") {
             val chance = ExpressionHelper.compileExpression(config.getString("Config.Chance"))
             run = { it, lv, castID ->
                 val c = chance(it).toDouble()
-                if(Math.random() <= c){
+                if (Math.random() <= c) {
                     if (next != null) {
                         next!!.cast(it, lv, castID)
                     }
-                }else{
+                } else {
                     Bukkit.getScheduler().runTaskLater(Main.Plugin, {
                         SkillManager.castingSkill.remove(castID)
                     }, 600)

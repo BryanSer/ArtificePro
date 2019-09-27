@@ -18,7 +18,7 @@ class Skill(
     val manaCost: Expression = ExpressionHelper.compileExpression(config.getString("ManaCost"))
     val maxLevel: Int = config.getInt("MaxLevel")
     val firstStep: Step
-    private val lastCast = mutableMapOf<String, Long>()
+    private val lastCast = mutableMapOf<UUID, Long>()
 
     init {
         val steps = mutableListOf<Step>()
@@ -47,7 +47,7 @@ class Skill(
             p.sendMessage("§c你没有足够的蓝释放这个技能")
             return
         }
-        val last = lastCast[p.name] ?: 0L
+        val last = lastCast[p.uniqueId] ?: 0L
         val cd = cooldown(p).toLong()
         val pass = System.currentTimeMillis() - last
         if (pass < cd) {
@@ -71,6 +71,6 @@ class Skill(
         data.level = lv
         SkillManager.castingSkill[castId] = data
         firstStep.cast(p, lv, castId)
-        lastCast[p.name] = System.currentTimeMillis()
+        lastCast[p.uniqueId] = System.currentTimeMillis()
     }
 }

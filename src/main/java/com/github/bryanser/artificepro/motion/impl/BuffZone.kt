@@ -24,7 +24,7 @@ class BuffZone : Motion("BuffZone") {
     lateinit var triggerTick: Expression
     val motion = mutableListOf<Motion>()
     lateinit var once: Expression
-    lateinit var particle: Particle
+    val particle = mutableListOf<Pair<Particle, Double>>()
 
     override fun cast(ci: CastInfo) {
         val pp = ci.caster
@@ -42,8 +42,10 @@ class BuffZone : Motion("BuffZone") {
             while (st <= Math.PI * 2) {
                 val x = cos(st) * r
                 val z = sin(st) * r
-                val loc = target.clone().add(x, 0.0, z)
-                particle.play(loc)
+                for ((par,y) in particle) {
+                    val loc = target.clone().add(x, y, z)
+                    par.play(loc)
+                }
                 st += add
             }
         }, 5, 5)
@@ -57,12 +59,12 @@ class BuffZone : Motion("BuffZone") {
                     return
                 }
                 if (time % tt == 0) {
-                    for(t in target.world.getNearbyEntities(target,r,r,r)){
-                        if(once && casted.contains(t.entityId) || t !is LivingEntity){
+                    for (t in target.world.getNearbyEntities(target, r, r, r)) {
+                        if (once && casted.contains(t.entityId) || t !is LivingEntity) {
                             continue
                         }
                         casted += t.entityId
-                        for(m in motion){
+                        for (m in motion) {
                             PassiveManager.attackEntity[ci.castId] = t
                             m.cast(CastInfo(pp, t, ci.castId))
                         }
@@ -70,15 +72,18 @@ class BuffZone : Motion("BuffZone") {
                 }
             }
 
-        }.runTaskTimer(Main.Plugin,1,1)
+        }.runTaskTimer(Main.Plugin, 1, 1)
     }
 
     override fun loadConfig(config: ConfigurationSection) {
-        particle = ParticleManager.readParticle(config.getString("Particle"))
+        for (s in config.getStringList("Particle")) {
+            val str = s.split(",".toRegex(), 2)
+            particle += ParticleManager.readParticle(str[1]) to str[0].toDouble()
+        }
         length = ExpressionHelper.compileExpression(config.getString("length"))
         radius = ExpressionHelper.compileExpression(config.getString("radius"))
         triggerTick = ExpressionHelper.compileExpression(config.getString("triggerTick"))
-        once = ExpressionHelper.compileExpression(config.getString("once"))
+        once = ExpressionHelper.compileExpression(config.getString("once"), true)
         time = ExpressionHelper.compileExpression(config.getString("time"))
         val mcs = config.getConfigurationSection("Motions")
         for (key in mcs.getKeys(false)) {
