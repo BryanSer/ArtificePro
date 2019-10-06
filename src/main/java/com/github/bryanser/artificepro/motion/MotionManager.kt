@@ -5,6 +5,7 @@ import com.github.bryanser.artificepro.motion.trigger.DamageTrigger
 import com.github.bryanser.artificepro.motion.trigger.EffectTrigger
 import com.github.bryanser.artificepro.motion.trigger.KnockTrigger
 import com.github.bryanser.artificepro.script.finder.isCitizens
+import com.github.bryanser.artificepro.shield.Shield
 import com.github.bryanser.artificepro.skill.SkillManager
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.LivingEntity
@@ -20,6 +21,10 @@ fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
     }
     if(from === this){
         return
+    }
+    var dmg = dmg
+    if(this is Player){
+        dmg *= 0.2
     }
     MotionManager.motionDamage += this.entityId
     val cd = SkillManager.castingSkill[castId]
@@ -131,6 +136,7 @@ object MotionManager {
         registerMotion("ParticleOval", ParticleOval::class.java)
         registerMotion("GreatLight",GreatLight::class.java)
         registerMotion("BuffZone",BuffZone::class.java)
+        registerMotion("Shield", Shield::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

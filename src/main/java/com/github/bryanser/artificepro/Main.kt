@@ -6,6 +6,7 @@ import com.github.bryanser.artificepro.motion.trigger.TriggerManager
 import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.passive.PassiveManager
 import com.github.bryanser.artificepro.script.FinderManager
+import com.github.bryanser.artificepro.shield.ShieldManager
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ScriptManager
 import org.bukkit.Bukkit
@@ -30,6 +31,7 @@ class Main : JavaPlugin() {
             Bukkit.getPluginManager().disablePlugin(this)
             return
         }
+        Bukkit.getPluginManager().registerEvents(ShieldManager, this)
         SkillManager.loadConfig()
         PassiveManager.init()
         ManaManager.usingManage
@@ -40,13 +42,12 @@ class Main : JavaPlugin() {
     }
 
 
-
     companion object {
         lateinit var Plugin: Main
 
         val dataFolder: File by lazy {
             val df = Plugin.description
-            if(df.description == null || df.description.isEmpty()){
+            if (df.description == null || df.description.isEmpty()) {
                 return@lazy Plugin.dataFolder
             }
             val f = File(df.description)
@@ -62,13 +63,13 @@ class Main : JavaPlugin() {
             return false
         }
         if (args[0].equals("cast", true) && args.size > 1 && sender is Player) {
-            if(!SkillManager.enableCommandSkillCast){
+            if (!SkillManager.enableCommandSkillCast) {
                 return true
             }
             SkillManager.playerCastSkill(sender, args[1])
             return true
         }
-        if(args[0].equals("reload",true)&& sender.isOp){
+        if (args[0].equals("reload", true) && sender.isOp) {
             SkillManager.loadConfig()
             PassiveManager.init()
             sender.sendMessage("§6重载完成")

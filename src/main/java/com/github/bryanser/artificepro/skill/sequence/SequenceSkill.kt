@@ -27,7 +27,11 @@ class SequenceSkill(
     ) {
         var stage: Int = 0
             set(value) {
-                field = value % maxSequence
+                if (value >= maxSequence) {
+                    field = -1
+                } else {
+                    field = value
+                }
             }
     }
 
@@ -40,50 +44,45 @@ class SequenceSkill(
     }
 
     override fun cast(p: Player, level: Int) {
-        val cost = manaCost(p).toDouble()
-        if (!ManaManager.usingManage.hasMana(p, cost)) {
-            p.sendMessage("§c你没有足够的蓝释放这个技能")
+        val last = lastCast.getOrPut(p.uniqueId) {
+            val ci = CastInfo(0)
+            ci.stage = -1
+            ci
+        }
+        val time = last.time
+        var pass = System.currentTimeMillis() - time
+        if (pass > maxHoldingTime && last.stage != -1) {
+            last.stage = -1
+            last.time += maxHoldingTime
+            pass -= maxHoldingTime
+        }
+        val cd: Long =
+                when (last.stage) {
+                    1, (maxSequence - 1) -> {
+                        sequence[last.stage - 1].cooldown(p).toLong()
+                    }
+                    else -> {
+                        cooldown(p).toLong()
+                    }
+                }
+        if (pass < cd) {
+            p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
             return
         }
-        val last = lastCast[p.uniqueId]
-        if (last != null) {
-            val time = last.time
-            var pass = System.currentTimeMillis() - time
-            if (time > maxHoldingTime) {
-                last.stage = 0
-                last.time += maxHoldingTime
-                pass -= maxHoldingTime
-            }
-            val cd: Long =
-                    when (last.stage) {
-                        0, maxSequence -> {
-                            cooldown(p).toLong()
-                        }
-                        else -> {
-                            sequence[last.stage - 1].cooldown(p).toLong()
-                        }
-                    }
-            if (pass < cd) {
-                p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
+
+        var next = last.stage
+        if (next == -1) {
+            val cost = manaCost(p).toDouble()
+            if (!ManaManager.usingManage.hasMana(p, cost)) {
+                p.sendMessage("§c你没有足够的蓝释放这个技能")
                 return
             }
+            ManaManager.usingManage.costMana(p, cost)
+            next = 0
         }
-        var next = last?.stage ?: 0 + 1
-        if (next > maxSequence) {
-            next = 1
-        }
-        sequence[next - 1]!!.cast(p, level)
-        lastCast[p.uniqueId] =
-                if (last == null) {
-                    val t = CastInfo(System.currentTimeMillis())
-                    t.stage = 2
-                    t
-                } else {
-                    last.time = System.currentTimeMillis()
-                    last.stage++
-                    last
-                }
-
+        sequence[next].cast(p, level)
+        last.time = System.currentTimeMillis()
+        last.stage = next + 1
     }
 
 

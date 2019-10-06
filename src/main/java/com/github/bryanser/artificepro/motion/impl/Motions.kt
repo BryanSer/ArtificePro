@@ -59,7 +59,7 @@ class Charge : Motion("Charge") {
                     p.velocity = Vector()
                     return
                 }
-                if (p.location.add(vec).block.type != Material.AIR) {
+                if (p.location.add(vec).add(0.0, 1.0, 0.0).block.type != Material.AIR) {
                     p.velocity = Vector()
                     this.cancel()
                     return
