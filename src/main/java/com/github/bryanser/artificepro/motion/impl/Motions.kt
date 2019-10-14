@@ -64,7 +64,7 @@ class Charge : Motion("Charge") {
                     this.cancel()
                     return
                 }
-                if (start.distanceSquared(p.location) >= lengthSq) {
+                if (start.distanceSquared2(p.location) >= lengthSq) {
                     p.velocity = Vector()
                     this.cancel()
                     return
@@ -167,6 +167,12 @@ class Flash : Motion("Flash") {
 
 }
 
+fun Location.distanceSquared2(loc:Location):Double{
+    if(this.world != loc.world){
+        return Double.MAX_VALUE
+    }
+    return this.distanceSquared(loc)
+}
 class FlamesColumn : Motion("FlamesColumn") {
     lateinit var damage: Expression
     lateinit var radius: Expression
@@ -229,7 +235,7 @@ class FlamesColumn : Motion("FlamesColumn") {
                 }
                 val loc = e.location
                 loc.y = 0.0
-                if (cloc.distanceSquared(loc) <= r * r) {
+                if (cloc.distanceSquared2(loc) <= r * r) {
                     list += e
                 }
             }

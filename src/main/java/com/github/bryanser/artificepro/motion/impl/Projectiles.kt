@@ -116,7 +116,7 @@ class LaunchGuided : Motion("LaunchGuided") {
                 var maxDis = Double.MAX_VALUE
                 var target: LivingEntity? = null
                 for (e in Tools.sectorSearch(loc, dir, r) { it != p }) {
-                    val dis = e.location.distanceSquared(loc)
+                    val dis = e.location.distanceSquared2(loc)
                     if (dis < maxDis) {
                         target = e
                         maxDis = dis

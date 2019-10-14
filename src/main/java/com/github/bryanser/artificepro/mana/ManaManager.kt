@@ -69,12 +69,12 @@ interface ManaManager {
                     if (!isEnable()) {
                         return ""
                     }
-                    return when (p1) {
-                        "mana" -> getMana(p0).toString()
-                        "max" -> maxMana(p0).toDouble().toString()
-                        "recover" -> manaRecover(p0).toDouble().toString()
-                        else -> ""
-                    }
+                    return String.format("%.2f", when (p1) {
+                        "mana" -> getMana(p0)
+                        "max" -> maxMana(p0).toDouble()
+                        "recover" -> manaRecover(p0).toDouble()
+                        else -> 0.0
+                    })
                 }
             }.hook()
         }
