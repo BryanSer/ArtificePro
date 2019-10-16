@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.motion
 
+import com.github.bryanser.artificepro.mark.Mark
 import com.github.bryanser.artificepro.motion.impl.*
 import com.github.bryanser.artificepro.motion.trigger.DamageTrigger
 import com.github.bryanser.artificepro.motion.trigger.EffectTrigger
@@ -28,11 +29,13 @@ fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
     }
     MotionManager.motionDamage += this.entityId
     val cd = SkillManager.castingSkill[castId]
-    if (cd != null && cd.passive) {
+    var exremove = false
+    if (cd != null && cd.passive && !ignoreAttack.contains(this.entityId)) {
         ignoreAttack += this.entityId
+        exremove = true
     }
     this.damage(dmg, from)
-    if (cd != null && cd.passive) {
+    if (cd != null && cd.passive && exremove) {
         ignoreAttack -= this.entityId
     }
     MotionManager.motionDamage -= this.entityId
@@ -137,6 +140,7 @@ object MotionManager {
         registerMotion("GreatLight",GreatLight::class.java)
         registerMotion("BuffZone",BuffZone::class.java)
         registerMotion("Shield", Shield::class.java)
+        registerMotion("Mark", Mark::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
