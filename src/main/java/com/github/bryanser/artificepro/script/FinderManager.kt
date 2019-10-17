@@ -1,5 +1,7 @@
 package com.github.bryanser.artificepro.script
 
+import com.github.bryanser.artificepro.mark.MarkEntityFinder
+import com.github.bryanser.artificepro.mark.MarkPlayerFinder
 import com.github.bryanser.artificepro.script.finder.*
 import java.lang.StringBuilder
 
@@ -52,6 +54,8 @@ object FinderManager {
         finderTemplates[DefenceFromEntityTemplate.name] = DefenceFromEntityTemplate
         finderTemplates[AttackTargetPlayerTemplate.name] = AttackTargetPlayerTemplate
         finderTemplates[DefenceFromPlayerTemplate.name] = DefenceFromPlayerTemplate
+        finderTemplates[MarkPlayerFinder.name] = MarkPlayerFinder
+        finderTemplates[MarkEntityFinder.name] = MarkEntityFinder
     }
 
 }
