@@ -22,7 +22,7 @@ object MarkPlayerFinder: PlayerFinderTemplate("MarkPlayer") {
         }
     }
 }
-object MarkEntityFinder: EntityFinderTemplate<LivingEntity>("MarkPlayer") {
+object MarkEntityFinder: EntityFinderTemplate<LivingEntity>("MarkEntity") {
     override fun read(args: Array<String>): Finder<LivingEntity> {
         val key = args[0]
         val player = args.getOrNull(1)?.toBoolean() ?: false

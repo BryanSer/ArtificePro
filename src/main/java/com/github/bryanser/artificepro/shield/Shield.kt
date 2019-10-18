@@ -45,6 +45,8 @@ class Shield : Motion("Shield") {
         if (config.contains("color")) {
             val c = config.getString("color").split(",")
             color = Color.fromRGB(c[0].toInt(), c[1].toInt(), c[2].toInt())
+        } else {
+            color = Color.BLUE
         }
     }
 }

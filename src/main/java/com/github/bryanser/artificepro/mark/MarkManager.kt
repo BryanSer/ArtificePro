@@ -13,7 +13,7 @@ object MarkManager : Runnable {
 
     val markDatas = mutableMapOf<UUID, MarkData>()
 
-    fun getData(uuid:UUID):MarkData = markDatas.getOrPut(uuid){
+    fun getData(uuid: UUID): MarkData = markDatas.getOrPut(uuid) {
         MarkData(uuid)
     }
 
@@ -40,17 +40,24 @@ object MarkManager : Runnable {
 
     override fun run() {
         val mit = markDatas.entries.iterator()
-        while(mit.hasNext()) {
-            val (name,data) = mit.next()
-            Bukkit.getEntity(name)?.also { p ->
+        while (mit.hasNext()) {
+            val (name, data) = mit.next()
+            val p = Bukkit.getEntity(name)
+            if (p != null) {
                 val iter = data.beenMarked.listIterator()
                 var index = 0
                 val size = data.beenMarked.size
-                val tar = (tick % size).toInt()
+                if (size == 0) {
+                    continue
+                }
+                var tar = (tick % size).toInt()
                 while (iter.hasNext()) {
                     val info = iter.next()
                     if (System.currentTimeMillis() > info.endTime) {
                         iter.remove()
+                        if (tar == size - 1) {
+                            tar--
+                        }
                         continue
                     }
                     if (tar == index) {
@@ -60,7 +67,9 @@ object MarkManager : Runnable {
                     }
                     index++
                 }
-            } ?: mit.remove()
+            } else {
+                mit.remove()
+            }
         }
         tick++
     }

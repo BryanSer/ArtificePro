@@ -1,6 +1,7 @@
 package com.github.bryanser.artificepro
 
 import com.github.bryanser.artificepro.mana.ManaManager
+import com.github.bryanser.artificepro.mark.MarkManager
 import com.github.bryanser.artificepro.motion.MotionManager
 import com.github.bryanser.artificepro.motion.trigger.TriggerManager
 import com.github.bryanser.artificepro.particle.ParticleManager
@@ -35,6 +36,7 @@ class Main : JavaPlugin() {
         SkillManager.loadConfig()
         PassiveManager.init()
         ManaManager.usingManage
+        MarkManager.init()
     }
 
     override fun onDisable() {

@@ -11,7 +11,7 @@ import org.bukkit.Color
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.LivingEntity
 
-object Mark : Motion("Mark") {
+class Mark : Motion("Mark") {
 
     lateinit var time: Expression
     lateinit var color: Color
@@ -23,14 +23,14 @@ object Mark : Motion("Mark") {
         for (target in finder(ci)) {
             val data = MarkManager.getData(target.uniqueId)
             val it = data.beenMarked.iterator()
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 val info = it.next()
-                if(info.key == this.key && info.from == ci.caster.uniqueId){
+                if (info.key == this.key && info.from == ci.caster.uniqueId) {
                     it.remove()
                     cdata.marks.remove(info)
                 }
             }
-            val info = MarkInfo(target.uniqueId,ci.caster.uniqueId,endTime,color,key)
+            val info = MarkInfo(target.uniqueId, ci.caster.uniqueId, endTime, color, key)
             data.beenMarked += info
             cdata.marks += info
         }
@@ -44,6 +44,11 @@ object Mark : Motion("Mark") {
         finder = f as Finder<LivingEntity>
         time = ExpressionHelper.compileExpression(config.getString("time"))
         key = config.getString("Key")
-
+        if (config.contains("color")) {
+            val c = config.getString("color").split(",")
+            color = Color.fromRGB(c[0].toInt(), c[1].toInt(), c[2].toInt())
+        } else {
+            color = Color.BLUE
+        }
     }
 }
