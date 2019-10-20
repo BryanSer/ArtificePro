@@ -18,7 +18,7 @@ class Mark : Motion("Mark") {
     lateinit var finder: Finder<LivingEntity>
     lateinit var key: String
     override fun cast(ci: CastInfo) {
-        val endTime = System.currentTimeMillis() + (time(ci.caster).toDouble() * 1000L).toLong()
+        val endTime = System.currentTimeMillis() + (time(ci.caster).toDouble() * 50L).toLong()
         val cdata = MarkManager.getData(ci.caster.uniqueId)
         for (target in finder(ci)) {
             val data = MarkManager.getData(target.uniqueId)

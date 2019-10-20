@@ -13,6 +13,16 @@ import java.util.*
 class Skill(
         config: ConfigurationSection
 ) : Castable {
+    override fun inCooldown(p: Player, leveL: Int): Boolean {
+        val last = lastCast[p.uniqueId] ?: 0L
+        val cd = cooldown(p).toLong()
+        val pass = System.currentTimeMillis() - last
+        if (pass < cd) {
+            return true
+        }
+        return false
+    }
+
     override val name: String = config.getString("Name")
     val cooldown: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
     val manaCost: Expression = ExpressionHelper.compileExpression(config.getString("ManaCost"))

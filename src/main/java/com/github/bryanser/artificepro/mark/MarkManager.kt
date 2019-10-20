@@ -55,6 +55,7 @@ object MarkManager : Runnable {
                     val info = iter.next()
                     if (System.currentTimeMillis() > info.endTime) {
                         iter.remove()
+                        info.remove()
                         if (tar == size - 1) {
                             tar--
                         }
@@ -68,6 +69,9 @@ object MarkManager : Runnable {
                     index++
                 }
             } else {
+                for(info in ArrayList(data.marks)) {
+                    info.remove()
+                }
                 mit.remove()
             }
         }
