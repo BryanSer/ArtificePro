@@ -55,6 +55,9 @@ object ShieldManager : Listener, Runnable {
             }
         }
         val s = this.size
+        if(s == 0){
+            return
+        }
         r /= s
         g /= s
         b /= s
