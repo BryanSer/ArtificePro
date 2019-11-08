@@ -1,8 +1,10 @@
 package com.github.bryanser.artificepro.mana
 
+import Br.RPGAttribute.Attribute
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
+import com.github.bryanser.artificepro.script.ExpressionResult
 import com.github.bryanser.brapi.Utils
 import me.clip.placeholderapi.external.EZPlaceholderHook
 import org.bukkit.configuration.file.YamlConfiguration
@@ -61,8 +63,26 @@ interface ManaManager {
                 Utils.saveResource(Main.Plugin, "config.yml", Main.dataFolder)
             }
             val config = YamlConfiguration.loadConfiguration(f)
-            maxMana = ExpressionHelper.compileExpression(config.getString("Mana.MaxMana"))
-            manaRecover = ExpressionHelper.compileExpression(config.getString("Mana.ManaRecover"))
+            val max = ExpressionHelper.compileExpression(config.getString("Mana.MaxMana"))
+            maxMana = {
+                val mm = max(it)
+                var v = mm.value
+                val t = Attribute.getAttribute(it)
+                t?.also{
+                    v += it.get(Attribute.State.Mana)?.random ?: 0.0
+                }
+                ExpressionResult(v)
+            }
+            val recover = ExpressionHelper.compileExpression(config.getString("Mana.ManaRecover"))
+            manaRecover = {
+                val mm = max(it)
+                var v = mm.value
+                val t = Attribute.getAttribute(it)
+                t?.also{
+                    v += it.get(Attribute.State.ManaRecover)?.random ?: 0.0
+                }
+                ExpressionResult(v)
+            }
             this.runTaskTimer(Main.Plugin, 20, 20)
             object : EZPlaceholderHook(Main.Plugin, "artificepromana") {
                 override fun onPlaceholderRequest(p0: Player, p1: String): String {
