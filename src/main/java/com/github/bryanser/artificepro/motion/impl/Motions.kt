@@ -297,13 +297,14 @@ class ShockWave : Motion("ShockWave") {
     lateinit var damage: Expression
     lateinit var length: Expression
     lateinit var width: Expression
+    lateinit var high: Expression
     lateinit var knock: Expression
     lateinit var speed: Expression //每tick传播的距离
     var particle: Particle? = null
 
     override fun cast(ci: CastInfo) {
         val p = ci.caster
-        val from = p.location
+        val from = p.location.add(0.0, high(p).toDouble(),0.0)
         val effectVec = from.direction.clone()
         effectVec.y = 0.6
         effectVec.normalize()
@@ -360,6 +361,7 @@ class ShockWave : Motion("ShockWave") {
         damage = ExpressionHelper.compileExpression(config.getString("damage"))
         length = ExpressionHelper.compileExpression(config.getString("length"))
         width = ExpressionHelper.compileExpression(config.getString("width"))
+        high = ExpressionHelper.compileExpression(config.getString("high","0.3"))
         knock = ExpressionHelper.compileExpression(config.getString("knock"))
         speed = ExpressionHelper.compileExpression(config.getString("speed"))
         if (config.contains("particle")) {
