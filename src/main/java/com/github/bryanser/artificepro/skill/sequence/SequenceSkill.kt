@@ -13,7 +13,7 @@ class SequenceSkill(
 ) : Castable {
 
     override fun inCooldown(p: Player, leveL: Int): Boolean {
-        val last = lastCast[p.uniqueId] ?: return true
+        val last = lastCast[p.uniqueId] ?: return false
         val cd = cooldown(p).toLong()
         val pass = System.currentTimeMillis() - last.time
         if (pass < cd) {
