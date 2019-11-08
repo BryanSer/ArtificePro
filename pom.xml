@@ -144,12 +144,5 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/Citizens.jar</systemPath>
         </dependency>
-        <dependency>
-            <groupId>br.bukkit</groupId>
-            <artifactId>RPGAttribute</artifactId>
-            <scope>system</scope>
-            <version>0.1</version>
-            <systemPath>${project.basedir}/RPGAttribute.jar</systemPath>
-        </dependency>
     </dependencies>
 </project>
