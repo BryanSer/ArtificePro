@@ -76,7 +76,7 @@ interface ManaManager {
             }
             val recover = ExpressionHelper.compileExpression(config.getString("Mana.ManaRecover"))
             manaRecover = {
-                val mm = max(it)
+                val mm = recover(it)
                 var v = mm.value + (manaRecoverHandler?.apply(it) ?: 0.0)
                 ExpressionResult(v)
             }
