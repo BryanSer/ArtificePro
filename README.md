@@ -1,3 +1,3 @@
-# $\bigwedge$rtificePro
+# ArtificePro
 
 
