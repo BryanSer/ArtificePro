@@ -20,7 +20,9 @@ import org.bukkit.Sound
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
@@ -167,12 +169,13 @@ class Flash : Motion("Flash") {
 
 }
 
-fun Location.distanceSquared2(loc:Location):Double{
-    if(this.world != loc.world){
+fun Location.distanceSquared2(loc: Location): Double {
+    if (this.world != loc.world) {
         return Double.MAX_VALUE
     }
     return this.distanceSquared(loc)
 }
+
 class FlamesColumn : Motion("FlamesColumn") {
     lateinit var damage: Expression
     lateinit var radius: Expression
@@ -304,7 +307,7 @@ class ShockWave : Motion("ShockWave") {
 
     override fun cast(ci: CastInfo) {
         val p = ci.caster
-        val from = p.location.add(0.0, high(p).toDouble(),0.0)
+        val from = p.location.add(0.0, high(p).toDouble(), 0.0)
         val effectVec = from.direction.clone()
         effectVec.y = 0.6
         effectVec.normalize()
@@ -361,7 +364,7 @@ class ShockWave : Motion("ShockWave") {
         damage = ExpressionHelper.compileExpression(config.getString("damage"))
         length = ExpressionHelper.compileExpression(config.getString("length"))
         width = ExpressionHelper.compileExpression(config.getString("width"))
-        high = ExpressionHelper.compileExpression(config.getString("high","0.3"))
+        high = ExpressionHelper.compileExpression(config.getString("high", "0.3"))
         knock = ExpressionHelper.compileExpression(config.getString("knock"))
         speed = ExpressionHelper.compileExpression(config.getString("speed"))
         if (config.contains("particle")) {
@@ -630,4 +633,43 @@ class GreatLight : Motion("GreatLight") {
             }
         }
     }
+}
+
+class Dodge : Motion("Dodge") {
+
+    lateinit var time: Expression
+    lateinit var force: Expression
+
+
+    override fun cast(ci: CastInfo) {
+        var vec = ci.caster.velocity
+        if(vec.lengthSquared() < 0.01){
+            vec = ci.caster.location.direction
+        }
+        vec = vec.normalize()
+        vec.y = 0.0001
+        vec = vec.normalize().multiply(force(ci.caster).toFloat())
+        ci.caster.sendMessage("vec: $vec")
+        ci.caster.velocity = vec
+        cast[ci.caster.entityId] = System.currentTimeMillis()  +( time(ci.caster).toDouble() * 1000L).toLong()
+    }
+
+    override fun loadConfig(config: ConfigurationSection) {
+        time = ExpressionHelper.compileExpression(config.getString("time"))
+        force = ExpressionHelper.compileExpression(config.getString("force"))
+    }
+    companion object :Listener{
+        val cast = hashMapOf<Int,Long>()
+        init{
+            Bukkit.getPluginManager().registerEvents(this,Main.Plugin)
+        }
+        @EventHandler(priority = EventPriority.MONITOR)
+        fun onDamage(evt:EntityDamageByEntityEvent ){
+            val last = cast[evt.entity.entityId] ?: return
+            if(System.currentTimeMillis() < last){
+                evt.isCancelled = true
+            }
+        }
+    }
+
 }

@@ -20,11 +20,11 @@ fun LivingEntity.motionDamage(dmg: Double, from: Player, castId: UUID) {
     if (isCitizens(this)) {
         return
     }
-    if(from === this){
+    if (from === this) {
         return
     }
     var dmg = dmg
-    if(this is Player){
+    if (this is Player) {
         dmg *= 0.2
     }
     MotionManager.motionDamage += this.entityId
@@ -137,10 +137,11 @@ object MotionManager {
         registerMotion("LaunchRain", LaunchRain::class.java)
         registerMotion("Lightning", Lightning::class.java)
         registerMotion("ParticleOval", ParticleOval::class.java)
-        registerMotion("GreatLight",GreatLight::class.java)
-        registerMotion("BuffZone",BuffZone::class.java)
+        registerMotion("GreatLight", GreatLight::class.java)
+        registerMotion("BuffZone", BuffZone::class.java)
         registerMotion("Shield", Shield::class.java)
         registerMotion("Mark", Mark::class.java)
+        registerMotion("Dodge", Dodge::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
