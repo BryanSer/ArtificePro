@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -36,6 +37,9 @@ object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEnti
                     break
                 }
                 if (e !is LivingEntity) {
+                    continue
+                }
+                if(e is ArmorStand){
                     continue
                 }
                 if (filter(e, p)) {
