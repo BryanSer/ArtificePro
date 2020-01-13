@@ -52,6 +52,11 @@ class LaunchItem : Motion("LaunchItem") {
         object : BukkitRunnable() {
             val from = tar.location
 
+            override fun cancel() {
+                super.cancel()
+                tar.remove()
+            }
+
             override fun run() {
                 val loc = tar.location
                 if (loc.distanceSquared2(from) > max) {
