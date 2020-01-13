@@ -142,6 +142,7 @@ object MotionManager {
         registerMotion("Shield", Shield::class.java)
         registerMotion("Mark", Mark::class.java)
         registerMotion("Dodge", Dodge::class.java)
+        registerMotion("LaunchItem", LaunchItem::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
