@@ -45,7 +45,7 @@ class LaunchItem : Motion("LaunchItem") {
                 it.rightArmPose = EulerAngle(-Math.PI / 18, 0.0, Math.PI / 2)
             }
         }
-        val max = this.maxLength(ci.caster).toDouble()
+        val max = this.maxLength(ci.caster).toDouble().let { it * it }
         val sp = speed(ci.caster).toDouble()
         val hr = hitRange(ci.caster).toDouble()
         val destroy = destroyOnHit(ci.caster).toBoolean()
@@ -70,7 +70,7 @@ class LaunchItem : Motion("LaunchItem") {
                         if (e == ci.caster) {
                             continue
                         }
-                        if (e is LivingEntity) {
+                        if (e is LivingEntity && e !is ArmorStand) {
                             for (t in cd.triggers) {
                                 if (t is LaunchItemTrigger) {
                                     if (t.key == this@LaunchItem.key) {

@@ -4,6 +4,7 @@ import com.github.bryanser.artificepro.motion.CastInfo
 import net.citizensnpcs.api.CitizensAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -22,7 +23,7 @@ fun isCitizens(e: Entity): Boolean {
             }
         }
     }
-    return false
+    return e is ArmorStand
 }
 
 abstract class FinderTemplate<out F : Any>(

@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -14,6 +15,9 @@ object SectorEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("SectorEn
             val list = mutableListOf<LivingEntity>()
             for (e in it.getNearbyEntities(r, r, r)) {
                 if (e !is LivingEntity) continue
+                if(e is ArmorStand){
+                    continue
+                }
                 if (!player && e is Player) continue
                 val vec = e.location.toVector().subtract(it.location.toVector()).normalize()
                 vec.y = 0.0
