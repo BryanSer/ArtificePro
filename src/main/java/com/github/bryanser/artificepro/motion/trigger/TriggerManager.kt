@@ -9,6 +9,7 @@ object TriggerManager {
         registerTriggers["DamageTrigger"] = DamageTrigger::class.java
         registerTriggers["KnockTrigger"] = KnockTrigger::class.java
         registerTriggers["EffectTrigger"] = EffectTrigger::class.java
+        registerTriggers["LaunchItemTrigger"] = LaunchItemTrigger::class.java
     }
 
     fun loadTrigger(config: ConfigurationSection): Trigger {
