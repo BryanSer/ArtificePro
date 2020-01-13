@@ -38,6 +38,7 @@ interface ManaManager {
                 return
             }
             for (p in Utils.getOnlinePlayers()) {
+
                 val r = manaRecover(p).toDouble()
                 val max = maxMana(p).toDouble()
                 var curr = mana[p.name] ?: max
