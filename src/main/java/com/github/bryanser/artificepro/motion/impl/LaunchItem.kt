@@ -50,8 +50,14 @@ class LaunchItem : Motion("LaunchItem") {
         val sp = speed(ci.caster).toDouble()
         val hr = hitRange(ci.caster).toDouble()
         val destroy = destroyOnHit(ci.caster).toBoolean()
+
+        if (DEBUG) {
+            Bukkit.getLogger().info("destroy: $destroy")
+        }
         object : BukkitRunnable() {
             val from = tar.location
+
+            val hit = hashSetOf<Int>()
 
             override fun cancel() {
                 super.cancel()
@@ -71,11 +77,14 @@ class LaunchItem : Motion("LaunchItem") {
                         if (e == ci.caster) {
                             continue
                         }
-                        if (e is LivingEntity && e !is ArmorStand) {
+                        if (e is LivingEntity && e !is ArmorStand && e.entityId !in hit) {
+                            hit += e.entityId
                             for (t in cd.triggers) {
                                 if (t is LaunchItemTrigger) {
                                     if (t.key == this@LaunchItem.key) {
-                                        Bukkit.broadcastMessage("${e.type}")
+                                        if (DEBUG) {
+                                            Bukkit.broadcastMessage("${e.type}")
+                                        }
                                         t.onTrigger(e, ci.caster, ci.castId)
                                         if (destroy) {
                                             this.cancel()
@@ -93,6 +102,8 @@ class LaunchItem : Motion("LaunchItem") {
     }
 
     companion object {
+        const val DEBUG = false
+
         val type0Offset: (loc: Location, left: Vector, rev: Boolean) -> Location = { it, left, rev ->
             if (rev) {
                 it.clone().add(left.clone().multiply(-0.37)).add(0.0, 1.17 - 0.4, 0.0)
@@ -126,6 +137,9 @@ class LaunchItem : Motion("LaunchItem") {
         hitRange = ExpressionHelper.compileExpression(config.getString("hitRange"))
         key = config.getString("key")
         type = config.getInt("type", 0)
+        if (DEBUG) {
+            Bukkit.getLogger().info("destroyOnHit: ${config.getString("destroyOnHit", "false")}")
+        }
         destroyOnHit = ExpressionHelper.compileExpression(config.getString("destroyOnHit", "false"), true)
     }
 }
