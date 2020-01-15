@@ -9,6 +9,7 @@ import com.github.bryanser.artificepro.script.ExpressionHelper
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ItemBuilder
 import com.github.bryanser.brapi.Utils
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
@@ -74,6 +75,7 @@ class LaunchItem : Motion("LaunchItem") {
                             for (t in cd.triggers) {
                                 if (t is LaunchItemTrigger) {
                                     if (t.key == this@LaunchItem.key) {
+                                        Bukkit.broadcastMessage("${e.type}")
                                         t.onTrigger(e, ci.caster, ci.castId)
                                         if (destroy) {
                                             this.cancel()
@@ -93,16 +95,16 @@ class LaunchItem : Motion("LaunchItem") {
     companion object {
         val type0Offset: (loc: Location, left: Vector, rev: Boolean) -> Location = { it, left, rev ->
             if (rev) {
-                it.clone().add(left.clone().multiply(-0.37)).add(0.0, 1.17, 0.0)
+                it.clone().add(left.clone().multiply(-0.37)).add(0.0, 1.17 - 0.4, 0.0)
             } else {
-                it.clone().add(left.clone().multiply(0.37)).add(0.0, 0.34, 0.0)
+                it.clone().add(left.clone().multiply(0.37)).add(0.0, 0.34 + 0.4, 0.0)
             }
         }//-30 0 0  deg
         val type1Offset: (loc: Location, left: Vector, rev: Boolean) -> Location = { it, left, rev ->
             if (rev) {
-                it.clone().add(left.clone().multiply(-0.84)).add(0.0, 1.4, 0.0)
+                it.clone().add(left.clone().multiply(-0.84)).add(0.0, 1.4 - 0.4, 0.0)
             } else {
-                it.clone().add(left.clone().multiply(0.84)).add(0.0, 0.1, 0.0)
+                it.clone().add(left.clone().multiply(0.84)).add(0.0, 0.1 + 0.4, 0.0)
             }
         }//-10 0 90 deg
     }

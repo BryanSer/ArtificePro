@@ -39,13 +39,11 @@ class LaunchItemTrigger:Trigger("LaunchItemTrigger"){
 
     override fun onTrigger(entity: LivingEntity, caster: Player, castId: UUID) {
         val cd = SkillManager.castingSkill[castId] ?: return
-        cd.skipTrigger = true
         if (super.triggerFinder) {
             this.motion.cast(CastInfo(caster, entity, castId))
         } else {
             this.motion.cast(CastInfo(caster, caster, castId))
         }
-        cd.skipTrigger = false
     }
 
 }
