@@ -118,20 +118,25 @@ class LaunchItem : Motion("LaunchItem") {
                 it.clone().add(left.clone().multiply(0.84)).add(0.0, 0.1 + 0.4, 0.0)
             }
         }//-10 0 90 deg
+
+        fun loadItem(str:List<String>) :ItemStack{
+            return str.run {
+                val id = this[0].toInt()
+                val dur = this.getOrNull(1)?.toShort() ?: 0
+                val lore = this.getOrNull(2)?.let { ChatColor.translateAlternateColorCodes('&', it) }
+                val item = ItemBuilder.createItem(Material.getMaterial(id), durability = 0) {
+                    lore?.apply {
+                        lore(this)
+                    }
+                }
+                item
+            }
+        }
     }
 
     override fun loadConfig(config: ConfigurationSection) {
         val str = config.getString("item").split(":")
-        str.run {
-            val id = this[0].toInt()
-            val dur = this.getOrNull(1)?.toShort() ?: 0
-            val lore = this.getOrNull(2)?.let { ChatColor.translateAlternateColorCodes('&', it) }
-            item = ItemBuilder.createItem(Material.getMaterial(id), durability = 0) {
-                lore?.apply {
-                    lore(this)
-                }
-            }
-        }
+        item = loadItem(str)
         speed = ExpressionHelper.compileExpression(config.getString("speed"))
         maxLength = ExpressionHelper.compileExpression(config.getString("maxLength"))
         hitRange = ExpressionHelper.compileExpression(config.getString("hitRange"))
