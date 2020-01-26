@@ -68,6 +68,13 @@ class SurroundItem : Motion("SurroundItem") {
                 }
             }
 
+            override fun cancel() {
+                super.cancel()
+                for(p in armorStand){
+                    p?.first?.remove()
+                }
+            }
+
             override fun run() {
                 angle += speed
                 if (angle > PI * 2) {
