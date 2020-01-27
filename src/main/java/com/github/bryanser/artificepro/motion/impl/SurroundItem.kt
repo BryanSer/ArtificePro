@@ -103,6 +103,7 @@ class SurroundItem : Motion("SurroundItem") {
                                 if (t is LaunchItemTrigger && t.key == key) {
                                     t.onTrigger(e, ci.caster, ci.castId)
                                     if (destroyOnHit) {
+                                        a.remove()
                                         armorStand[it] = null
                                         continue@T
                                     }
