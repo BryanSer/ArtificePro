@@ -12,6 +12,10 @@ import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.LivingEntity
+import org.bukkit.event.EventHandler
+import org.bukkit.event.HandlerList
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.math.PI
@@ -37,11 +41,22 @@ class SurroundItem : Motion("SurroundItem") {
         val time = time(ci.caster).toInt()
         val amount = amount(ci.caster).toInt()
         val diff = PI * 2 / amount
-        object : BukkitRunnable() {
+        object : BukkitRunnable(),Listener {
             var rtime = time
             var angle = 0.0
 
             var count = 0
+
+            init{
+                Bukkit.getPluginManager().registerEvents(this,Main.getPlugin())
+            }
+
+            @EventHandler
+            fun onTeleport(evt:PlayerTeleportEvent){
+                if(evt.player.name == ci.caster.name){
+                    this.cancel()
+                }
+            }
 
             fun proj(ang: Double): Location {
                 val center = ci.caster.location
@@ -73,6 +88,7 @@ class SurroundItem : Motion("SurroundItem") {
                 for(p in armorStand){
                     p?.first?.remove()
                 }
+                HandlerList.unregisterAll(this)
             }
 
             override fun run() {
