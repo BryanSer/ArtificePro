@@ -15,6 +15,8 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
@@ -49,6 +51,20 @@ class SurroundItem : Motion("SurroundItem") {
 
             init{
                 Bukkit.getPluginManager().registerEvents(this,Main.getPlugin())
+            }
+
+            @EventHandler
+            fun onDeath(evt:PlayerDeathEvent){
+                if(evt.entity.name == ci.caster.name){
+                    this.cancel()
+                }
+            }
+
+            @EventHandler
+            fun onQuit(evt:PlayerQuitEvent){
+                if(evt.player.name == ci.caster.name){
+                    this.cancel()
+                }
             }
 
             @EventHandler
