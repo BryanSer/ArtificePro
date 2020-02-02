@@ -29,6 +29,24 @@ abstract class Trigger(
     abstract fun onTrigger(entity: LivingEntity, caster: Player, castId: UUID)
 }
 
+class ShapeTrigger:Trigger("ShapeTrigger"){
+    lateinit var motion: Motion
+    lateinit var key:String
+    override fun loadConfig(config: ConfigurationSection) {
+        motion = MotionManager.loadMotion(config.getConfigurationSection("Motion"))
+        key = config.getString("key")
+    }
+
+    override fun onTrigger(entity: LivingEntity, caster: Player, castId: UUID) {
+        val cd = SkillManager.castingSkill[castId] ?: return
+        if (super.triggerFinder) {
+            this.motion.cast(CastInfo(caster, entity, castId))
+        } else {
+            this.motion.cast(CastInfo(caster, caster, castId))
+        }
+    }
+
+}
 class LaunchItemTrigger:Trigger("LaunchItemTrigger"){
     lateinit var motion: Motion
     lateinit var key:String

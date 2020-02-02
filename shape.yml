@@ -1,0 +1,26 @@
+#大写的O是原点
+shape: |
+    *****************
+    *XxXxXxXxXxXxXxX*
+    *XxXxXxXxXxXxXxX*
+    *XxXxXxXxXxXxXxX*
+    *XxXxXxXxXxXxXxX*
+    *XxXxXxXxXxXxXxX*
+    *XxXxXxXxXxXxXxX*
+    *****xxxxxxx*****
+        *xxxxxxx*
+        *xxxxxxx*
+        *xxxxxxx*
+        ****O****
+#配置区域每个符号的例子 没有配置的区域没有特效
+particle:
+    '*': 'ColorDust(0,255,0)'
+    x: 'ColorDust(255,0,0)'
+    o: 'ColorDust(0,255,0)'
+#有伤害的位置
+damage:
+    - 'x'
+    - '*'
+    - 'X'
+#形状尺寸 (是每个字符的宽度)
+size: 0.1

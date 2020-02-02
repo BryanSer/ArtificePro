@@ -10,6 +10,7 @@ object TriggerManager {
         registerTriggers["KnockTrigger"] = KnockTrigger::class.java
         registerTriggers["EffectTrigger"] = EffectTrigger::class.java
         registerTriggers["LaunchItemTrigger"] = LaunchItemTrigger::class.java
+        registerTriggers["ShapeTrigger"] = ShapeTrigger::class.java
     }
 
     fun loadTrigger(config: ConfigurationSection): Trigger {

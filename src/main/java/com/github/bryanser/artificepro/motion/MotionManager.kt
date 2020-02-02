@@ -2,6 +2,7 @@ package com.github.bryanser.artificepro.motion
 
 import com.github.bryanser.artificepro.mark.Mark
 import com.github.bryanser.artificepro.motion.impl.*
+import com.github.bryanser.artificepro.motion.impl.shapezone.DamageZone
 import com.github.bryanser.artificepro.motion.trigger.DamageTrigger
 import com.github.bryanser.artificepro.motion.trigger.EffectTrigger
 import com.github.bryanser.artificepro.motion.trigger.KnockTrigger
@@ -144,6 +145,7 @@ object MotionManager {
         registerMotion("Dodge", Dodge::class.java)
         registerMotion("LaunchItem", LaunchItem::class.java)
         registerMotion("SurroundItem",SurroundItem::class.java)
+        registerMotion("DamageZone", DamageZone::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
