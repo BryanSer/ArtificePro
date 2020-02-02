@@ -64,3 +64,4 @@ Motions:
             key: 'example_shape'
             delay: '40'
             self: false
+            follow: false
