@@ -30,7 +30,7 @@ Motions:
                 Name: 'Damage'
                 Config:
                     damage: '10.0'
-                    Finder: 'EntityLocation(SelfEntity())'
+                    Finder: 'SelfEntity()'
     '2':
         Level: 0
         Name: 'DamageZone'
