@@ -169,7 +169,7 @@ class Flash : Motion("Flash") {
 
 }
 
-fun Location.distanceSquared2(loc: Location): Double {
+inline fun Location.distanceSquared2(loc: Location): Double {
     if (this.world != loc.world) {
         return Double.MAX_VALUE
     }

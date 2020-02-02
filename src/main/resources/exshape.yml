@@ -1,0 +1,66 @@
+Name: 'exShape'
+Cooldown: 5000 - 500 * %level%
+ManaCost: 100
+MaxLevel: 10
+Motions:
+    '0':
+        Level: 0
+        Name: 'Trigger'
+        Config:
+            Type: 'ShapeTrigger'
+            maxTime: 0
+            triggerFinder: true
+            key: 'example_shape'
+            Motion:
+                Name: 'ParticleCircle'
+                Config:
+                    Finder: EntityLocation(SelfEntity())
+                    r: 1.5
+                    p: 12
+                    Particle: Flame(2,0,0,0,1)
+    '1':
+        Level: 0
+        Name: 'Trigger'
+        Config:
+            Type: 'ShapeTrigger'
+            maxTime: 0
+            triggerFinder: true
+            key: 'example_shape'
+            Motion:
+                Name: 'Damage'
+                Config:
+                    damage: '10.0'
+                    Finder: 'EntityLocation(SelfEntity())'
+    '2':
+        Level: 0
+        Name: 'DamageZone'
+        Config:
+            Shape:
+                shape: |
+                    *****************
+                    *XxXxXxXxXxXxXxX*
+                    *XxXxXxXxXxXxXxX*
+                    *XxXxXxXxXxXxXxX*
+                    *XxXxXxXxXxXxXxX*
+                    *XxXxXxXxXxXxXxX*
+                    *XxXxXxXxXxXxXxX*
+                    *****xxxxxxx*****
+                        *xxxxxxx*
+                        *xxxxxxx*
+                        *xxxxxxx*
+                        ****O****
+                #配置区域每个符号的例子 没有配置的区域没有特效
+                particle:
+                    '*': 'ColorDust(0,255,0)'
+                    x: 'ColorDust(255,0,0)'
+                    o: 'ColorDust(0,255,0)'
+                #有伤害的位置
+                damage:
+                    - 'x'
+                    - '*'
+                    - 'X'
+                #形状尺寸 (是每个字符的宽度)
+                size: 0.1
+            key: 'example_shape'
+            delay: '40'
+            self: false
