@@ -144,8 +144,10 @@ object MotionManager {
         registerMotion("Mark", Mark::class.java)
         registerMotion("Dodge", Dodge::class.java)
         registerMotion("LaunchItem", LaunchItem::class.java)
-        registerMotion("SurroundItem",SurroundItem::class.java)
+        registerMotion("SurroundItem", SurroundItem::class.java)
         registerMotion("DamageZone", DamageZone::class.java)
+        registerMotion("SoundEffect", SoundEffect::class.java)
+        registerMotion("CustomSoundEffect", CustomSoundEffect::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {
