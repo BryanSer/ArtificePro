@@ -39,9 +39,9 @@ object Limit {
     }
 
     fun load() {
-        val f = File(Main.dataFolder, "castLimit.yml")
+        val f = File(Main.Plugin.dataFolder, "castLimit.yml")
         if (!f.exists()) {
-            Utils.saveResource(Main.Plugin, "castLimit.yml", Main.dataFolder)
+            Utils.saveResource(Main.Plugin, "castLimit.yml")
         }
         val config = YamlConfiguration.loadConfiguration(f)
         residence_self = config.getBoolean("Residence.self")
