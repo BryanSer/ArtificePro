@@ -1,5 +1,6 @@
 package com.github.bryanser.artificepro.script.finder
 
+import net.citizensnpcs.nms.v1_10_R1.entity.nonliving.ItemController
 import org.bukkit.entity.Player
 
 /*
@@ -13,6 +14,10 @@ object RangePlayerFinderTemplate : PlayerFinderTemplate("RangePlayer") {
         return Finder{
             val list = mutableListOf<Player>()
             var count = 0
+            if(self && it is Player){
+                list += it
+                count++
+            }
             for (e in it.getNearbyEntities(r, r, r)) {
                 if (max > 0 && count >= max) {
                     break
