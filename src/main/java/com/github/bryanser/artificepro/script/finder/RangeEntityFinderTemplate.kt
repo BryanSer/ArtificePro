@@ -32,6 +32,10 @@ object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEnti
         return Finder { p ->
             val list = mutableListOf<LivingEntity>()
             var count = 0
+            if (filter(p, p)) {
+                list += p
+                count++
+            }
             for (e in p.getNearbyEntities(r, r, r)) {
                 if (max > 0 && count >= max) {
                     break
@@ -39,10 +43,10 @@ object RangeEntityFinderTemplate : EntityFinderTemplate<LivingEntity>("RangeEnti
                 if (e !is LivingEntity) {
                     continue
                 }
-                if(e is ArmorStand){
+                if (e is ArmorStand) {
                     continue
                 }
-                if (filter(e, p)) {
+                if (e !== p && filter(e, p)) {
                     list += e
                     count++
                 }
