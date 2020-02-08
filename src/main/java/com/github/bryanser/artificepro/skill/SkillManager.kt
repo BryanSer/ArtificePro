@@ -36,7 +36,7 @@ object SkillManager {
         loadSequence()
     }
 
-    fun loadSequence(){
+    fun loadSequence() {
         val folder = File(Main.dataFolder, "${File.separator}sequences${File.separator}")
         if (!folder.exists()) {
             folder.mkdirs()
@@ -54,20 +54,21 @@ object SkillManager {
 
     }
 
-    fun playerCastSkill(p: Player, skill: String) {
+    @JvmOverloads
+    fun playerCastSkill(p: Player, skill: String, lv: Int = -1) {
         val skill = skills[skill]
         if (skill == null) {
             p.sendMessage("§c找不到这个技能")
             return
         }
-        if (!p.hasPermission("artificepro.cast.${skill.name}")) {
+        if (lv == -1 && !p.hasPermission("artificepro.cast.${skill.name}")) {
             p.sendMessage("§c你不能使用这个技能")
             return
         }
-        if(!Limit.checkCastable(p)){
+        if (!Limit.checkCastable(p)) {
             p.sendMessage("§c这里不能使用技能")
             return
         }
-        skill.cast(p)
+        skill.cast(p, lv)
     }
 }
