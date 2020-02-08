@@ -2,7 +2,7 @@ name: ArtificePro
 version: ${project.version}
 main: com.github.bryanser.artificepro.Main
 depend: [BrAPI,PlaceholderAPI]
-
+softdepend: [Residence]
 commands:
     ArtificePro:
         aliases: [ap]
