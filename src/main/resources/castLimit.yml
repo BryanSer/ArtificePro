@@ -1,0 +1,11 @@
+Residence:
+    #是否允许在自己的领地上释放技能
+    self: true
+    #是否允许在其他人的领地上释放技能
+    other: false
+World:
+    #世界列表
+    list:
+        - 'world'
+    #设定是黑名单还是白名单(false为黑名单 true为白名单)
+    allow: false

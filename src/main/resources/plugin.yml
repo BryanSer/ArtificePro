@@ -4,6 +4,7 @@ main: com.github.bryanser.artificepro.Main
 depend: [BrAPI,PlaceholderAPI]
 description: 'D:\BaiduNetdiskDownload\零世纪制作\BC\ArtificePro'
 
+softdepend: [Residence]
 commands:
     ArtificePro:
         aliases: [ap]

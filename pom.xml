@@ -139,20 +139,27 @@
             <artifactId>placeholderapi</artifactId>
             <version>2.9.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/PlaceholderAPI.jar</systemPath>
+            <systemPath>${project.basedir}/lib/PlaceholderAPI.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.citizensnpcs</groupId>
             <artifactId>citizensnpcs</artifactId>
             <version>1.2.3</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/Citizens.jar</systemPath>
+            <systemPath>${project.basedir}/lib/Citizens.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
             <version>4.4.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bekvon.bukkit</groupId>
+            <artifactId>Residence</artifactId>
+            <version>4.7.8.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Residence4.7.8.2.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

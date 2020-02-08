@@ -64,6 +64,10 @@ object SkillManager {
             p.sendMessage("§c你不能使用这个技能")
             return
         }
+        if(!Limit.checkCastable(p)){
+            p.sendMessage("§c这里不能使用技能")
+            return
+        }
         skill.cast(p)
     }
 }
