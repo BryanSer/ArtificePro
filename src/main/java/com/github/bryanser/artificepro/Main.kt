@@ -8,6 +8,7 @@ import com.github.bryanser.artificepro.particle.ParticleManager
 import com.github.bryanser.artificepro.passive.PassiveManager
 import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.shield.ShieldManager
+import com.github.bryanser.artificepro.skill.Limit
 import com.github.bryanser.artificepro.skill.SkillManager
 import com.github.bryanser.brapi.ScriptManager
 import org.bukkit.Bukkit
@@ -25,6 +26,7 @@ class Main : JavaPlugin() {
         FinderManager.init()
         ParticleManager.init()
         TriggerManager.init()
+        Limit.load()
     }
 
     override fun onEnable() {
@@ -74,6 +76,7 @@ class Main : JavaPlugin() {
         if (args[0].equals("reload", true) && sender.isOp) {
             SkillManager.loadConfig()
             PassiveManager.init()
+            Limit.load()
             sender.sendMessage("§6重载完成")
             return true
         }
