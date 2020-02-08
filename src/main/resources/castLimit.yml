@@ -3,6 +3,11 @@ Residence:
     self: true
     #是否允许在其他人的领地上释放技能
     other: false
+    #领地列表
+    list:
+        - 'spawn'
+    #设定是黑名单还是白名单(false为黑名单 true为白名单)
+    allow: false
 World:
     #世界列表
     list:

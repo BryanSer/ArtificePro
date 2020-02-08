@@ -1,18 +1,18 @@
 package com.github.bryanser.artificepro.skill
 
-import com.bekvon.bukkit.residence.Residence
 import com.bekvon.bukkit.residence.api.ResidenceApi
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.brapi.Utils
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import java.io.File
 
 object Limit {
-    var residence_self = true
-    var residence_other = false
+    var residenceSelf = true
+    var residenceOther = false
+    lateinit var residenceList:List<String>
+    var residenceAllow = false
 
     lateinit var worldList: List<String>
     var worldAllow = false
@@ -29,10 +29,17 @@ object Limit {
         if(hasResidence){
             val res = ResidenceApi.getResidenceManager().getByLoc(loc) ?: return true
             val isOwner = res.isOwner(p)
-            if(isOwner){
-                return residence_self
+            val allow = if(isOwner){
+                 residenceSelf
             }else{
-                return residence_other
+                residenceOther
+            }
+            if(!allow){
+                return false
+            }
+            val rc = residenceList.contains(res.name)
+            if(rc xor residenceAllow){
+                return false
             }
         }
         return true
@@ -44,8 +51,10 @@ object Limit {
             Utils.saveResource(Main.Plugin, "castLimit.yml")
         }
         val config = YamlConfiguration.loadConfiguration(f)
-        residence_self = config.getBoolean("Residence.self")
-        residence_other = config.getBoolean("Residence.other")
+        residenceSelf = config.getBoolean("Residence.self")
+        residenceOther = config.getBoolean("Residence.other")
+        residenceList = config.getStringList("Residence.list")
+        residenceAllow = config.getBoolean("Residence.allow")
         worldList = config.getStringList("World.list")
         worldAllow = config.getBoolean("World.allow")
     }
