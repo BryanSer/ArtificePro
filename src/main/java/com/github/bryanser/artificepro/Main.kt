@@ -10,6 +10,7 @@ import com.github.bryanser.artificepro.script.FinderManager
 import com.github.bryanser.artificepro.shield.ShieldManager
 import com.github.bryanser.artificepro.skill.Limit
 import com.github.bryanser.artificepro.skill.SkillManager
+import com.github.bryanser.artificepro.tools.ArmorStandManager
 import com.github.bryanser.brapi.ScriptManager
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -42,6 +43,7 @@ class Main : JavaPlugin() {
     }
 
     override fun onDisable() {
+        ArmorStandManager.removeAll()
         ManaManager.DefaultManager.save()
     }
 

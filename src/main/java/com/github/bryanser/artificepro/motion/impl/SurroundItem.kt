@@ -6,6 +6,7 @@ import com.github.bryanser.artificepro.motion.trigger.LaunchItemTrigger
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
 import com.github.bryanser.artificepro.skill.SkillManager
+import com.github.bryanser.artificepro.tools.ArmorStandManager
 import com.github.bryanser.brapi.Main
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -84,7 +85,7 @@ class SurroundItem : Motion("SurroundItem") {
 
             val armorStand: Array<Pair<ArmorStand, MutableSet<Int>>?> = Array(amount) {
                 val ang = it * diff
-                val i = ci.caster.world.spawn(proj(ang), ArmorStand::class.java) {
+                val i = ArmorStandManager.createArmorStand(proj(ang)) {
                     it.isMarker = true
                     it.isVisible = false
                     it.setGravity(false)
