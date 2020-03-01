@@ -13,7 +13,7 @@ object ArmorStandManager : Runnable {
     const val META_KEY_CREATE_TIME = "artificepro_as_creattime"
     const val MAX_TIME = 60000L
 
-    init {
+    fun init() {
         Bukkit.getScheduler().runTaskTimer(Main.getPlugin(), this, 200, 200)
         Bukkit.getScheduler().runTaskTimerAsynchronously(Main.getPlugin(), {
             saveUUID()
@@ -24,13 +24,13 @@ object ArmorStandManager : Runnable {
     fun saveUUID() {
         val f = File(Main.PLGUIN.dataFolder, "ArmorStandManager.tmp")
         val config = YamlConfiguration()
-        config.set("agentUUID", ArrayList(agentUUID.map{it.toString()}))
+        config.set("agentUUID", ArrayList(agentUUID.map { it.toString() }))
         config.save(f)
     }
 
     fun checkUUID() {
         val f = File(Main.PLGUIN.dataFolder, "ArmorStandManager.tmp")
-        if(f.exists()){
+        if (f.exists()) {
             val config = YamlConfiguration()
             val uids = config.getStringList("agentUUID")
             agentUUID.addAll(uids.map { UUID.fromString(it) })
@@ -67,7 +67,7 @@ object ArmorStandManager : Runnable {
                 a?.remove()
                 it.remove()
             } else {
-                if(!a.hasMetadata(META_KEY_CREATE_TIME)){
+                if (!a.hasMetadata(META_KEY_CREATE_TIME)) {
                     a.remove()
                     it.remove()
                     continue

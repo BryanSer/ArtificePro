@@ -31,6 +31,7 @@ class Main : JavaPlugin() {
     }
 
     override fun onEnable() {
+        ArmorStandManager.init()
         if (!ScriptManager.hasNashorn) {
             Bukkit.getPluginManager().disablePlugin(this)
             return
