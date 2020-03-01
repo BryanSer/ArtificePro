@@ -61,7 +61,7 @@ class SequenceSkill(
         }
         val time = last.time
         var pass = System.currentTimeMillis() - time
-        if (pass > maxHoldingTime && last.stage != -1) {
+        if (pass > maxHoldingTime && last.stage != -1 && maxHoldingTime != -1) {
             last.stage = -1
             last.time += maxHoldingTime
             pass -= maxHoldingTime
