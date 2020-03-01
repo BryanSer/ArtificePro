@@ -7,6 +7,7 @@ import com.github.bryanser.artificepro.motion.trigger.LaunchItemTrigger
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
 import com.github.bryanser.artificepro.skill.SkillManager
+import com.github.bryanser.artificepro.tools.ArmorStandManager
 import com.github.bryanser.brapi.ItemBuilder
 import com.github.bryanser.brapi.Utils
 import org.bukkit.Bukkit
@@ -35,7 +36,7 @@ class LaunchItem : Motion("LaunchItem") {
         val vec = ci.caster.location.direction
         val left = Utils.getLeft(vec)
         val offset: (loc: Location, left: Vector, rev: Boolean) -> Location = if (type == 0) type0Offset else type1Offset
-        val tar = ci.caster.world.spawn(offset(ci.caster.location, left, false), ArmorStand::class.java) {
+        val tar = ArmorStandManager.createArmorStand(offset(ci.caster.location, left, false)) {
             it.isMarker = true
             it.isVisible = false
             it.setGravity(false)
