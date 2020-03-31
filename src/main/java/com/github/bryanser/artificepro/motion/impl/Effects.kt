@@ -57,7 +57,7 @@ class Heal : Motion("Heal") {
             } else {
                 v
             }
-            var health = p.health + h
+            var health = target.health + h
             if (health > max) {
                 health = max
             } else if (health < 0) {
