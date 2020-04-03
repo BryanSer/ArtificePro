@@ -148,6 +148,7 @@ object MotionManager {
         registerMotion("DamageZone", DamageZone::class.java)
         registerMotion("SoundEffect", SoundEffect::class.java)
         registerMotion("CustomSoundEffect", CustomSoundEffect::class.java)
+        registerMotion("Claw", Claw::class.java)
     }
 
     fun registerMotion(name: String, cls: Class<out Motion>) {

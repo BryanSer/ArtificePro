@@ -6,7 +6,7 @@
 
     <groupId>com.github.bryanser</groupId>
     <artifactId>ArtificePro</artifactId>
-    <version>1.5.9</version>
+    <version>1.5.10</version>
     <packaging>jar</packaging>
 
     <name>ArtificePro</name>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>com.github.bryanser</groupId>
             <artifactId>BrAPI</artifactId>
-            <version>Kt-1.0.4</version>
+            <version>Kt-1.0.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
