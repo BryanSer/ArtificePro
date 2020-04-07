@@ -96,8 +96,8 @@ class CustomClaw : Claw("CustomClaw") {
 
     private fun height(time: Double, at: Double, height: Double): Double {
         val x = (1.0 - at / time)
-        val b = -height - 1
-        return x.pow(2) + b * x + height
+        val b = -height + 1
+        return -x.pow(2) + b * x + height
     }
 
     override fun loadConfig(config: ConfigurationSection) {
