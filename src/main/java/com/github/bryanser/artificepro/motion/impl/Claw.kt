@@ -42,6 +42,7 @@ class CustomClaw : Claw("CustomClaw") {
             val display = mutableListOf<Data>()
             var curr: Location = from.clone()
             val damaged = hashSetOf<Int>()
+            val by = from.y
 
             override fun run() {
                 val it = display.iterator()
@@ -54,7 +55,7 @@ class CustomClaw : Claw("CustomClaw") {
                     if (data.times >= mtick) {
                         it.remove()
                     }
-                    data.at.y = height(time, data.times / 20.0, height)
+                    data.at.y = by + height(time, data.times / 20.0, height)
                     cache.add(data.at.clone())
                     if (cd != null) {
                         for (e in data.at.world.getNearbyEntities(data.at, 0.2, 0.2, 0.2)) {
