@@ -76,11 +76,11 @@ object ShieldManager : Listener, Runnable {
             var st = 0.0
             while (st <= Math.PI * 2.0) {
                 val loc = tloc.clone()
-                loc.setY(loc.getY() + y)
-                loc.setX(loc.getX() + Math.cos(st))
-                loc.setZ(loc.getZ() + Math.sin(st))
+                loc.y += y
+                loc.x += Math.cos(st)
+                loc.z +=  Math.sin(st)
                 ParticleEffect.REDSTONE.display(color, loc, 100.0)
-                st += Math.PI / 12.0
+                st += Math.PI / 8.0
             }
         }
     }
