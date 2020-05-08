@@ -35,7 +35,7 @@ class CustomClaw : Claw("CustomClaw") {
         val rad = Math.toRadians(angle(ci.caster).toDouble())
         val x = cos(rad)
         val z = sin(rad)
-        val vec = f.multiply(x).add(r.multiply(z)).normalize().multiply(spd / 20.0)
+        val vec = f.multiply(x).add(r.multiply(z)).normalize().multiply(spd / 10.0)
         val max = length(ci.caster).toDouble().pow(2.0)
         object : BukkitRunnable() {
             val from = ci.caster.location
@@ -92,7 +92,7 @@ class CustomClaw : Claw("CustomClaw") {
 //                    ParticleEffect.REDSTONE.display(ParticleEffect.OrdinaryColor(255, 0, 0), loc, 50.0)
                 }
             }
-        }.runTaskTimer(Main.getPlugin(), 1, 1)
+        }.runTaskTimer(Main.getPlugin(), 2, 2)
     }
 
     private fun height(time: Double, at: Double, height: Double): Double {
