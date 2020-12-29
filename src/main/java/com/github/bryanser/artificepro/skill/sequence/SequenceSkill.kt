@@ -14,7 +14,7 @@ class SequenceSkill(
 
     override fun inCooldown(p: Player, leveL: Int): Boolean {
         val last = lastCast[p.uniqueId] ?: return false
-        val cd = cooldown(p).toLong()
+        val cd = cooldownExp(p).toLong()
         val pass = System.currentTimeMillis() - last.time
         if (pass < cd) {
             return true
@@ -22,7 +22,7 @@ class SequenceSkill(
         return false
     }
     override val name: String = config.getString("Name")
-    val cooldown: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
+    val cooldownExp: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
     val manaCost: Expression = ExpressionHelper.compileExpression(config.getString("ManaCost"))
 
     val maxHoldingTime: Int = config.getInt("MaxHoldingTime")
@@ -53,6 +53,16 @@ class SequenceSkill(
         }
     }
 
+    override fun cooldown(p: Player, level: Int ): Double {
+        val last = lastCast[p.uniqueId]?.time ?: 0L
+        val cd = cooldownExp.invoke(p).toLong()
+        val pass = System.currentTimeMillis() - last
+        if (pass < cd) {
+            return 1 - pass.toDouble() / cd
+        }
+        return 0.0
+    }
+
     override fun cast(p: Player, level: Int) {
         val last = lastCast.getOrPut(p.uniqueId) {
             val ci = CastInfo(0)
@@ -72,11 +82,11 @@ class SequenceSkill(
                         sequence[last.stage - 1].cooldown(p).toLong()
                     }
                     else -> {
-                        cooldown(p).toLong()
+                        cooldownExp(p).toLong()
                     }
                 }
         if (pass < cd) {
-            p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
+            p.sendMessage(String.format("§f[§c系统§f] §c技能正在冷却,还剩§e %.2f §c秒!", (cd - pass).toDouble() / 1000.0))
             return
         }
 
@@ -84,7 +94,7 @@ class SequenceSkill(
         if (next == -1) {
             val cost = manaCost(p).toDouble()
             if (!ManaManager.usingManage.hasMana(p, cost)) {
-                p.sendMessage("§c你没有足够的蓝释放这个技能")
+                p.sendMessage("§f[§c系统§f] §c你没有足够的蓝释放这个技能")
                 return
             }
             ManaManager.usingManage.costMana(p, cost)
