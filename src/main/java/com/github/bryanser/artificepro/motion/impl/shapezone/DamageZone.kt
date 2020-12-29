@@ -29,12 +29,13 @@ class DamageZone : Motion("DamageZone") {
                 shape.playEffect(loc)
             }
             override fun run() {
-                if (follow) {
-                    loc = ci.caster.location
-                }
                 if (tick++ == delay) {
+                    this.cancel()
                     val cd = SkillManager.castingSkill[ci.castId]
                     if(cd != null) {
+                        if (follow) {
+                            loc = ci.caster.location
+                        }
                         for(e in shape.getDamageZoneEntities(loc)){
                             if(!self && e == ci.caster){
                                 continue
@@ -49,8 +50,11 @@ class DamageZone : Motion("DamageZone") {
                             }
                         }
                     }
-                    this.cancel()
                     return
+                }
+
+                if (follow) {
+                    loc = ci.caster.location
                 }
                 if (tick % 3 == 0) {
                     shape.playEffect(loc)

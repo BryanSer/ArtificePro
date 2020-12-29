@@ -15,7 +15,7 @@ class Skill(
 ) : Castable {
     override fun inCooldown(p: Player, leveL: Int): Boolean {
         val last = lastCast[p.uniqueId] ?: 0L
-        val cd = cooldown(p).toLong()
+        val cd = cooldownExp(p).toLong()
         val pass = System.currentTimeMillis() - last
         if (pass < cd) {
             return true
@@ -24,7 +24,7 @@ class Skill(
     }
 
     override val name: String = config.getString("Name")
-    val cooldown: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
+    val cooldownExp: Expression = ExpressionHelper.compileExpression(config.getString("Cooldown"))
     val manaCost: Expression = ExpressionHelper.compileExpression(config.getString("ManaCost"))
     val maxLevel: Int = config.getInt("MaxLevel")
     val firstStep: Step
@@ -51,17 +51,27 @@ class Skill(
         firstStep = steps.first()
     }
 
+    override fun cooldown(p: Player, level: Int ): Double {
+        val last = lastCast[p.uniqueId] ?: 0L
+        val cd = cooldownExp(p).toLong()
+        val pass = System.currentTimeMillis() - last
+        if (pass < cd) {
+            return 1 - pass.toDouble() / cd
+        }
+        return 0.0
+    }
+
     override fun cast(p: Player, level: Int) {
         val cost = manaCost(p).toDouble()
         if (!ManaManager.usingManage.hasMana(p, cost)) {
-            p.sendMessage("§c你没有足够的蓝释放这个技能")
+            p.sendMessage("§f[§c系统§f] §c你没有足够的蓝释放这个技能")
             return
         }
         val last = lastCast[p.uniqueId] ?: 0L
-        val cd = cooldown(p).toLong()
+        val cd = cooldownExp(p).toLong()
         val pass = System.currentTimeMillis() - last
         if (pass < cd) {
-            p.sendMessage(String.format("§c技能还在冷却中 还需要%.1f秒", (cd - pass).toDouble() / 1000.0))
+            p.sendMessage(String.format("§f[§c系统§f] §c技能正在冷却,还剩§e %.2f §c秒!", (cd - pass).toDouble() / 1000.0))
             return
         }
         ManaManager.usingManage.costMana(p, cost)

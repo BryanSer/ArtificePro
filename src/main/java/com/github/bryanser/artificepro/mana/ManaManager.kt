@@ -3,12 +3,14 @@ package com.github.bryanser.artificepro.mana
 import com.github.bryanser.artificepro.Main
 import com.github.bryanser.artificepro.script.Expression
 import com.github.bryanser.artificepro.script.ExpressionHelper
+import com.github.bryanser.artificepro.script.ExpressionResult
 import com.github.bryanser.brapi.Utils
 import me.clip.placeholderapi.external.EZPlaceholderHook
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
+import java.util.function.Function
 
 interface ManaManager {
     fun getMana(p: Player): Double
@@ -36,6 +38,7 @@ interface ManaManager {
                 return
             }
             for (p in Utils.getOnlinePlayers()) {
+
                 val r = manaRecover(p).toDouble()
                 val max = maxMana(p).toDouble()
                 var curr = mana[p.name] ?: max
@@ -51,6 +54,11 @@ interface ManaManager {
         val manaRecover: Expression
         val mana = mutableMapOf<String, Double>()
 
+        @JvmField
+        var maxManaHandler: Function<Player,Double>? = null
+        @JvmField
+        var manaRecoverHandler: Function<Player,Double>? = null
+
         fun isEnable(): Boolean {
             return usingManage === this
         }
@@ -61,8 +69,18 @@ interface ManaManager {
                 Utils.saveResource(Main.Plugin, "config.yml", Main.dataFolder)
             }
             val config = YamlConfiguration.loadConfiguration(f)
-            maxMana = ExpressionHelper.compileExpression(config.getString("Mana.MaxMana"))
-            manaRecover = ExpressionHelper.compileExpression(config.getString("Mana.ManaRecover"))
+            val max = ExpressionHelper.compileExpression(config.getString("Mana.MaxMana"))
+            maxMana = {
+                val mm = max(it)
+                var v = mm.value + (maxManaHandler?.apply(it) ?: 0.0)
+                ExpressionResult(v)
+            }
+            val recover = ExpressionHelper.compileExpression(config.getString("Mana.ManaRecover"))
+            manaRecover = {
+                val mm = recover(it)
+                var v = mm.value + (manaRecoverHandler?.apply(it) ?: 0.0)
+                ExpressionResult(v)
+            }
             this.runTaskTimer(Main.Plugin, 20, 20)
             object : EZPlaceholderHook(Main.Plugin, "artificepromana") {
                 override fun onPlaceholderRequest(p0: Player, p1: String): String {
