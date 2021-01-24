@@ -5,7 +5,7 @@ depend: [BrAPI,PlaceholderAPI]
 softdepend: [Residence]
 commands:
     ArtificePro:
-        aliases: [ap]
+        aliases: [artp,ap]
         usage: |
             §6/<command> cast [技能名] >> 释放一个技能
             §6/<command> reload >> 重载插件
